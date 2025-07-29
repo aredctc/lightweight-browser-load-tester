@@ -1,0 +1,39 @@
+{
+  "concurrentUsers": 15,
+  "testDuration": 900,
+  "rampUpTime": 90,
+  "streamingUrl": "https://example.com/stream",
+  "requestParameters": [
+    {
+      "target": "header",
+      "name": "User-Agent",
+      "valueTemplate": "LoadTester/1.0 Session-{{sessionId}}",
+      "scope": "per-session"
+    },
+    {
+      "target": "query",
+      "name": "test_id",
+      "valueTemplate": "load_test_{{timestamp}}",
+      "scope": "global"
+    }
+  ],
+  "resourceLimits": {
+    "maxMemoryPerInstance": 768,
+    "maxCpuPercentage": 85,
+    "maxConcurrentInstances": 25
+  },
+  "prometheus": {
+    "enabled": true,
+    "remoteWriteUrl": "https://prometheus.example.com/api/v1/write",
+    "username": "load-tester",
+    "password": "secure-password",
+    "batchSize": 100,
+    "flushInterval": 30,
+    "timeout": 10000,
+    "retryAttempts": 3,
+    "retryDelay": 1000,
+    "headers": {
+      "X-Custom-Header": "load-test-metrics"
+    }
+  }
+}

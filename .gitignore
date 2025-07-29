@@ -204,7 +204,9 @@ test-results.xml
 
 # Load test results
 results/
-*.json
+results.json
+test-results.json
+*-results.json
 
 # OS generated files
 .DS_Store

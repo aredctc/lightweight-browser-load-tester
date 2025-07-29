@@ -1,0 +1,69 @@
+{
+  "name": "lightweight-browser-load-tester",
+  "version": "1.0.0",
+  "description": "A lightweight load testing tool using real browsers for streaming applications with DRM support",
+  "main": "dist/index.js",
+  "bin": {
+    "load-tester": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "load-testing",
+    "browser",
+    "streaming",
+    "drm",
+    "playwright",
+    "kubernetes",
+    "performance",
+    "testing",
+    "automation",
+    "widevine",
+    "playready",
+    "fairplay",
+    "prometheus",
+    "opentelemetry",
+    "docker",
+    "aws-eks",
+    "gke",
+    "aks",
+    "open-source"
+  ],
+  "author": "Artem Redchyts <artem.redchitz@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aredctc/lightweight-browser-load-tester.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aredctc/lightweight-browser-load-tester/issues"
+  },
+  "homepage": "https://github.com/aredctc/lightweight-browser-load-tester#readme",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "joi": "^17.11.0",
+    "playwright": "^1.40.0",
+    "winston": "^3.11.0",
+    "yaml": "^2.3.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-node": "^0.26.0",
+    "@opentelemetry/exporter-otlp-http": "^0.26.0",
+    "@opentelemetry/resources": "^1.9.0",
+    "@opentelemetry/semantic-conventions": "^1.9.0"
+  }
+}

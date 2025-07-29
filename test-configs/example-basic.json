@@ -1,0 +1,11 @@
+{
+  "concurrentUsers": 5,
+  "testDuration": 300,
+  "rampUpTime": 30,
+  "streamingUrl": "https://example.com/stream",
+  "resourceLimits": {
+    "maxMemoryPerInstance": 512,
+    "maxCpuPercentage": 80,
+    "maxConcurrentInstances": 10
+  }
+}
