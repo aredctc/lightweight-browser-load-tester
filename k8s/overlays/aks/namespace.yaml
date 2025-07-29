@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: load-tester
+  labels:
+    name: load-tester
+    environment: aks
+    cloud-provider: azure

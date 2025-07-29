@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-tester
+  labels:
+    app: load-tester
+    version: v1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-tester
+  template:
+    metadata:
+      labels:
+        app: load-tester
+        version: v1.0.0
+    spec:
+      containers:
+      - name: load-tester
+        image: load-tester:latest
+        imagePullPolicy: IfNotPresent
+        command: ["node", "dist/index.js", "test"]
+        args: ["--config", "/config/load-test-config.yaml"]
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: LT_CONCURRENT_USERS
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: concurrent-users
+              optional: true
+        - name: LT_TEST_DURATION
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: test-duration
+              optional: true
+        - name: LT_STREAMING_URL
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: streaming-url
+        - name: LT_DRM_LICENSE_URL
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: drm-license-url
+              optional: true
+        - name: LT_PROMETHEUS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: prometheus-enabled
+              optional: true
+        - name: LT_PROMETHEUS_URL
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: prometheus-url
+              optional: true
+        - name: LT_PROMETHEUS_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: prometheus-username
+              optional: true
+        - name: LT_PROMETHEUS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: prometheus-password
+              optional: true
+        - name: LT_OTEL_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: otel-enabled
+              optional: true
+        - name: LT_OTEL_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: otel-endpoint
+              optional: true
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+          readOnly: true
+        - name: results-volume
+          mountPath: /results
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: dev-shm
+          mountPath: /dev/shm
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+      volumes:
+      - name: config-volume
+        configMap:
+          name: load-tester-config-file
+      - name: results-volume
+        emptyDir: {}
+      - name: tmp-volume
+        emptyDir: {}
+      - name: dev-shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 2Gi
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+      dnsPolicy: ClusterFirst
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-tester-config
+  labels:
+    app: load-tester
+data:
+  concurrent-users: "10"
+  test-duration: "600"
+  streaming-url: "https://example.com/stream"
+  prometheus-enabled: "false"
+  otel-enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-tester-config-file
+  labels:
+    app: load-tester
+data:
+  load-test-config.yaml: |
+    concurrentUsers: 10
+    testDuration: 600
+    rampUpTime: 60
+    streamingUrl: https://example.com/stream
+    requestParameters: []
+    resourceLimits:
+      maxMemoryPerInstance: 512
+      maxCpuPercentage: 80
+      maxConcurrentInstances: 20
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: load-tester-secrets
+  labels:
+    app: load-tester
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual values
+  # drm-license-url: aHR0cHM6Ly9leGFtcGxlLmNvbS9saWNlbnNl
+  # prometheus-url: aHR0cHM6Ly9wcm9tZXRoZXVzLmV4YW1wbGUuY29tL2FwaS92MS93cml0ZQ==
+  # prometheus-username: dXNlcm5hbWU=
+  # prometheus-password: cGFzc3dvcmQ=
+  # otel-endpoint: aHR0cHM6Ly9vdGVsLmV4YW1wbGUuY29tL3YxL21ldHJpY3M=

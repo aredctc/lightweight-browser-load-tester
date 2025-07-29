@@ -1,0 +1,27 @@
+concurrentUsers: 10
+testDuration: 600
+rampUpTime: 60
+streamingUrl: https://example.com/drm-stream
+
+drmConfig:
+  type: widevine
+  licenseUrl: https://example.com/license
+  certificateUrl: https://example.com/cert
+  customHeaders:
+    Authorization: Bearer token123
+    X-Custom-Header: custom-value
+
+requestParameters:
+  - target: header
+    name: Authorization
+    valueTemplate: Bearer {{token}}
+    scope: per-session
+  - target: query
+    name: userId
+    valueTemplate: user_{{sessionId}}
+    scope: per-session
+
+resourceLimits:
+  maxMemoryPerInstance: 1024
+  maxCpuPercentage: 90
+  maxConcurrentInstances: 20

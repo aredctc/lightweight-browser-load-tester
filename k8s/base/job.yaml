@@ -1,0 +1,252 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-tester-job
+  labels:
+    app: load-tester
+    type: job
+spec:
+  ttlSecondsAfterFinished: 3600  # Clean up job after 1 hour
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: load-tester
+        type: job
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: load-tester
+        image: load-tester:latest
+        imagePullPolicy: IfNotPresent
+        command: ["node", "dist/index.js", "test"]
+        args: 
+        - "--config"
+        - "/config/load-test-config.yaml"
+        - "--output"
+        - "/results/test-results.json"
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: LT_CONCURRENT_USERS
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: concurrent-users
+              optional: true
+        - name: LT_TEST_DURATION
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: test-duration
+              optional: true
+        - name: LT_STREAMING_URL
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: streaming-url
+        - name: LT_DRM_LICENSE_URL
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: drm-license-url
+              optional: true
+        - name: LT_PROMETHEUS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: prometheus-enabled
+              optional: true
+        - name: LT_PROMETHEUS_URL
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: prometheus-url
+              optional: true
+        - name: LT_PROMETHEUS_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: prometheus-username
+              optional: true
+        - name: LT_PROMETHEUS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: prometheus-password
+              optional: true
+        - name: LT_OTEL_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: load-tester-config
+              key: otel-enabled
+              optional: true
+        - name: LT_OTEL_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: load-tester-secrets
+              key: otel-endpoint
+              optional: true
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+          readOnly: true
+        - name: results-volume
+          mountPath: /results
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: dev-shm
+          mountPath: /dev/shm
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+      volumes:
+      - name: config-volume
+        configMap:
+          name: load-tester-config-file
+      - name: results-volume
+        persistentVolumeClaim:
+          claimName: load-tester-results-pvc
+      - name: tmp-volume
+        emptyDir: {}
+      - name: dev-shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: load-tester-results-pvc
+  labels:
+    app: load-tester
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard  # Adjust based on your cluster's storage classes
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: load-tester-cronjob
+  labels:
+    app: load-tester
+    type: cronjob
+spec:
+  schedule: "0 2 * * *"  # Run daily at 2 AM
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400  # Clean up job after 24 hours
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: load-tester
+            type: cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: load-tester
+            image: load-tester:latest
+            imagePullPolicy: IfNotPresent
+            command: ["node", "dist/index.js", "test"]
+            args: 
+            - "--config"
+            - "/config/load-test-config.yaml"
+            - "--output"
+            - "/results/scheduled-test-$(date +%Y%m%d-%H%M%S).json"
+            env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LT_CONCURRENT_USERS
+              valueFrom:
+                configMapKeyRef:
+                  name: load-tester-config
+                  key: concurrent-users
+                  optional: true
+            - name: LT_TEST_DURATION
+              valueFrom:
+                configMapKeyRef:
+                  name: load-tester-config
+                  key: test-duration
+                  optional: true
+            - name: LT_STREAMING_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: load-tester-config
+                  key: streaming-url
+            - name: LT_PROMETHEUS_ENABLED
+              value: "true"
+            - name: LT_PROMETHEUS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: load-tester-secrets
+                  key: prometheus-url
+                  optional: true
+            - name: LT_PROMETHEUS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: load-tester-secrets
+                  key: prometheus-username
+                  optional: true
+            - name: LT_PROMETHEUS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: load-tester-secrets
+                  key: prometheus-password
+                  optional: true
+            resources:
+              requests:
+                memory: "2Gi"
+                cpu: "1000m"
+              limits:
+                memory: "8Gi"
+                cpu: "4000m"
+            volumeMounts:
+            - name: config-volume
+              mountPath: /config
+              readOnly: true
+            - name: results-volume
+              mountPath: /results
+            - name: tmp-volume
+              mountPath: /tmp
+            - name: dev-shm
+              mountPath: /dev/shm
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              runAsGroup: 1000
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              readOnlyRootFilesystem: false
+          volumes:
+          - name: config-volume
+            configMap:
+              name: load-tester-config-file
+          - name: results-volume
+            persistentVolumeClaim:
+              claimName: load-tester-results-pvc
+          - name: tmp-volume
+            emptyDir: {}
+          - name: dev-shm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 2Gi

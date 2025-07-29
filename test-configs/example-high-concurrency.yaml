@@ -1,0 +1,32 @@
+concurrentUsers: 50
+testDuration: 1800
+rampUpTime: 300
+streamingUrl: https://example.com/dash-stream
+
+requestParameters:
+  - target: header
+    name: X-Load-Test
+    valueTemplate: "true"
+    scope: global
+  - target: header
+    name: X-User-ID
+    valueTemplate: user_{{sessionId}}
+    scope: per-session
+  - target: query
+    name: session_start
+    valueTemplate: "{{timestamp}}"
+    scope: per-session
+  - target: query
+    name: test_run
+    valueTemplate: high_concurrency_{{random}}
+    scope: global
+
+resourceLimits:
+  maxMemoryPerInstance: 384
+  maxCpuPercentage: 75
+  maxConcurrentInstances: 60
+
+# Optimized for high concurrency testing
+# Reduced memory per instance to support more concurrent users
+# Longer ramp-up time to avoid overwhelming the target system
+# Suitable for stress testing streaming infrastructure

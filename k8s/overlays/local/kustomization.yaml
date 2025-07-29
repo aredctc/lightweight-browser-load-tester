@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: load-tester
+
+resources:
+- ../../base/deployment.yaml
+- ../../base/service.yaml
+- ../../base/job.yaml
+- namespace.yaml
+
+patchesStrategicMerge:
+- deployment-patch.yaml
+- configmap-patch.yaml
+
+images:
+- name: load-tester
+  newTag: latest
+
+commonLabels:
+  environment: local
+  
+configMapGenerator:
+- name: load-tester-config-local
+  literals:
+  - concurrent-users=5
+  - test-duration=300
+  - streaming-url=https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8
+  - prometheus-enabled=false
+  - otel-enabled=false

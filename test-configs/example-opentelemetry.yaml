@@ -1,0 +1,46 @@
+concurrentUsers: 20
+testDuration: 1200
+rampUpTime: 120
+streamingUrl: https://example.com/hls-stream
+
+drmConfig:
+  type: widevine
+  licenseUrl: https://example.com/widevine/license
+  customHeaders:
+    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+    X-DRM-Version: "1.0"
+
+requestParameters:
+  - target: header
+    name: Authorization
+    valueTemplate: Bearer {{token}}
+    scope: per-session
+  - target: header
+    name: X-Session-ID
+    valueTemplate: session_{{sessionId}}_{{timestamp}}
+    scope: per-session
+  - target: query
+    name: client_id
+    valueTemplate: load_tester_{{random}}
+    scope: per-session
+
+resourceLimits:
+  maxMemoryPerInstance: 1024
+  maxCpuPercentage: 90
+  maxConcurrentInstances: 30
+
+opentelemetry:
+  enabled: true
+  endpoint: https://otel-collector.example.com/v1/metrics
+  protocol: http/protobuf
+  serviceName: browser-load-tester
+  serviceVersion: 1.0.0
+  timeout: 15000
+  compression: gzip
+  batchTimeout: 5000
+  maxExportBatchSize: 512
+  maxQueueSize: 2048
+  exportTimeout: 30000
+  headers:
+    X-API-Key: otel-api-key-12345
+    X-Environment: load-testing

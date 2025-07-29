@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-tester-config-file
+data:
+  load-test-config.yaml: |
+    concurrentUsers: 5
+    testDuration: 300
+    rampUpTime: 30
+    streamingUrl: https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8
+    requestParameters: []
+    resourceLimits:
+      maxMemoryPerInstance: 256
+      maxCpuPercentage: 70
+      maxConcurrentInstances: 10
