@@ -1,6 +1,6 @@
-# 🚀 Lightweight Browser Load Tester v1.0.0
+# 🚀 Lightweight Browser Load Tester v1.0.0-rc.1
 
-## 🎉 Initial Release
+## 🎉 Release Candidate - Ready for Testing!
 
 We're excited to announce the first stable release of the Lightweight Browser Load Tester! This tool provides comprehensive load testing capabilities for streaming applications with full DRM support.
 
@@ -43,10 +43,14 @@ We're excited to announce the first stable release of the Lightweight Browser Lo
 
 ## 📦 Installation
 
-### NPM Package
+### NPM Package (Release Candidate)
 ```bash
-npm install -g lightweight-browser-load-tester
+# Install the RC version
+npm install -g lightweight-browser-load-tester@rc
 load-tester --help
+
+# Or install specific RC version
+npm install -g lightweight-browser-load-tester@1.0.0-rc.1
 ```
 
 ### Docker Image

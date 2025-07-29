@@ -86,11 +86,37 @@ jobs:
           npm install
         fi
     
+    - name: Extract version from GitHub tag
+      id: version
+      run: |
+        # Remove 'v' prefix from tag (e.g., v1.0.0-rc.1 -> 1.0.0-rc.1)
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Publishing version: $VERSION"
+    
+    - name: Update package.json version
+      run: |
+        npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        echo "Updated package.json to version ${{ steps.version.outputs.version }}"
+    
     - name: Build project
       run: npm run build
     
     - name: Publish to NPM
-      run: npm publish
+      run: |
+        if [[ "${{ steps.version.outputs.version }}" == *"-rc."* ]]; then
+          echo "Publishing as release candidate with 'rc' tag"
+          npm publish --tag rc
+        elif [[ "${{ steps.version.outputs.version }}" == *"-beta."* ]]; then
+          echo "Publishing as beta with 'beta' tag"
+          npm publish --tag beta
+        elif [[ "${{ steps.version.outputs.version }}" == *"-alpha."* ]]; then
+          echo "Publishing as alpha with 'alpha' tag"
+          npm publish --tag alpha
+        else
+          echo "Publishing as stable release with 'latest' tag"
+          npm publish
+        fi
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
