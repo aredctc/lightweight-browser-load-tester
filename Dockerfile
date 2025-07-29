@@ -37,10 +37,9 @@ RUN apk add --no-cache \
     ttf-freefont \
     dumb-init
 
-# Create non-root user (handle existing group gracefully)
-RUN addgroup -S loadtester 2>/dev/null || true && \
-    adduser -D -S -s /bin/sh -G loadtester loadtester 2>/dev/null || \
-    (adduser -D -S -s /bin/sh loadtester && addgroup loadtester loadtester)
+# Create non-root user without specifying GID/UID to avoid conflicts
+RUN addgroup -S loadtester && \
+    adduser -D -S -s /bin/sh -G loadtester loadtester
 
 # Set working directory
 WORKDIR /app
