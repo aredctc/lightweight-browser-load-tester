@@ -14,8 +14,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -44,10 +44,14 @@ RUN addgroup -S loadtester && \
 # Set working directory
 WORKDIR /app
 
+# Copy package files first
+COPY --from=builder --chown=loadtester:loadtester /app/package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
+
 # Copy built application from builder stage
 COPY --from=builder --chown=loadtester:loadtester /app/dist ./dist
-COPY --from=builder --chown=loadtester:loadtester /app/node_modules ./node_modules
-COPY --from=builder --chown=loadtester:loadtester /app/package*.json ./
 
 # Create necessary directories
 RUN mkdir -p /app/results /app/config /tmp && \
