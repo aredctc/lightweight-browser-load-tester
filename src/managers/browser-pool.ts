@@ -1,7 +1,7 @@
-import { Browser, BrowserContext, chromium, Page } from 'playwright';
+import { Browser, chromium } from 'playwright';
 import { EventEmitter } from 'events';
-import { ResourceLimits, BrowserMetrics, BrowserPoolConfig, ManagedBrowserInstance } from '../types';
-import { ErrorRecoveryManager, CircuitBreakerState } from './error-recovery';
+import { BrowserMetrics, BrowserPoolConfig, ManagedBrowserInstance } from '../types';
+import { ErrorRecoveryManager } from './error-recovery';
 
 /**
  * Browser pool manager that handles browser instance lifecycle and resource monitoring
@@ -577,19 +577,19 @@ export class BrowserPool extends EventEmitter {
     try {
       await instance.page.evaluate(() => {
         // Clear localStorage
-        if (typeof localStorage !== 'undefined') {
-          localStorage.clear();
+        if (typeof (globalThis as any).localStorage !== 'undefined') {
+          (globalThis as any).localStorage.clear();
         }
         // Clear sessionStorage
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.clear();
+        if (typeof (globalThis as any).sessionStorage !== 'undefined') {
+          (globalThis as any).sessionStorage.clear();
         }
         // Clear IndexedDB
-        if (typeof indexedDB !== 'undefined') {
-          indexedDB.databases?.().then(databases => {
-            databases.forEach(db => {
+        if (typeof (globalThis as any).indexedDB !== 'undefined') {
+          (globalThis as any).indexedDB.databases?.().then((databases: any[]) => {
+            databases.forEach((db: any) => {
               if (db.name) {
-                indexedDB.deleteDatabase(db.name);
+                (globalThis as any).indexedDB.deleteDatabase(db.name);
               }
             });
           });
@@ -614,8 +614,8 @@ export class BrowserPool extends EventEmitter {
     try {
       await instance.page.evaluate(() => {
         // Force garbage collection in browser context
-        if (typeof window !== 'undefined' && (window as any).gc) {
-          (window as any).gc();
+        if (typeof (globalThis as any).window !== 'undefined' && ((globalThis as any).window as any).gc) {
+          ((globalThis as any).window as any).gc();
         }
       });
     } catch (error) {

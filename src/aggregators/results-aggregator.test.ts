@@ -5,7 +5,6 @@ import {
   DRMMetrics,
   NetworkMetrics,
   ErrorLog,
-  TestResults,
   PrometheusConfiguration
 } from '../types/index.js';
 import fs from 'fs/promises';

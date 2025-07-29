@@ -1,13 +1,9 @@
 import {
     TestResults,
-    TestSummary,
     BrowserMetrics,
     DRMMetrics,
     NetworkMetrics,
     ErrorLog,
-    StreamingMetrics,
-    StreamingError,
-    DRMError,
     PrometheusConfiguration
 } from '../types/index.js';
 import { PrometheusExporter } from '../exporters/prometheus-exporter.js';

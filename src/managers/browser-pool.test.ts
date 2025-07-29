@@ -172,7 +172,7 @@ describe('BrowserPool', () => {
     });
 
     it('should return metrics for all instances', async () => {
-      const instance = await browserPool.acquireInstance();
+      const _instance = await browserPool.acquireInstance();
       
       const metrics = browserPool.getMetrics();
       
@@ -188,7 +188,7 @@ describe('BrowserPool', () => {
     });
 
     it('should return correct pool status', async () => {
-      const instance = await browserPool.acquireInstance();
+      const _instance = await browserPool.acquireInstance();
       
       const status = browserPool.getPoolStatus();
       

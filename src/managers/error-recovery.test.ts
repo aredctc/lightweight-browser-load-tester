@@ -195,7 +195,7 @@ describe('ErrorRecoveryManager', () => {
 
     it('should record restart attempts', () => {
       const instanceId = 'test-instance-1';
-      const error = new Error('Test error');
+      const _error = new Error('Test error');
       const eventSpy = vi.fn();
       
       errorRecovery.on('restart-attempted', eventSpy);

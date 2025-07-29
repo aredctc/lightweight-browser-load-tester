@@ -2,7 +2,7 @@
  * Tests for OpenTelemetry exporter
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { OpenTelemetryExporter } from './opentelemetry-exporter';
 import { OpenTelemetryConfiguration, BrowserMetrics, DRMMetrics, NetworkMetrics, ErrorLog, TestSummary } from '../types';
 
@@ -20,9 +20,9 @@ describe('OpenTelemetryExporter', () => {
   let mockConfig: OpenTelemetryConfiguration;
 
   // Mock objects
-  let mockMeterProvider: any;
-  let mockMeter: any;
-  let mockMetricInstruments: any;
+  let _mockMeterProvider: any;
+  let _mockMeter: any;
+  let _mockMetricInstruments: any;
 
   beforeEach(() => {
     // Reset all mocks

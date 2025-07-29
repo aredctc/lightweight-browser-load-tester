@@ -5,13 +5,11 @@ import {
   TestConfiguration, 
   TestResults, 
   TestSummary, 
-  BrowserMetrics, 
   NetworkMetrics, 
   ErrorLog,
   ManagedBrowserInstance,
   BrowserPoolConfig,
-  DRMMetrics,
-  StreamingMetrics
+  DRMMetrics
 } from '../types';
 
 /**
@@ -502,7 +500,7 @@ export class TestRunner extends EventEmitter {
     const rampUpIntervalMs = (this.config.rampUpTime * 1000) / this.config.concurrentUsers;
     let startedSessions = 0;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const startNextSession = async () => {
         try {
           if (startedSessions >= this.config.concurrentUsers || !this.isRunning) {

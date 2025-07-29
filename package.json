@@ -10,7 +10,12 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "test": "vitest --run",
+    "test:ci": "vitest --run --config vitest.ci.config.ts",
+    "test:unit": "vitest --run --config vitest.ci.config.ts",
+    "test:integration": "vitest --run src/integration.test.ts",
+    "test:performance": "vitest --run src/performance.test.ts",
     "test:watch": "vitest",
+    "test:watch:unit": "vitest --config vitest.ci.config.ts",
     "lint": "eslint src/**/*.ts",
     "clean": "rm -rf dist"
   },

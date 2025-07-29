@@ -7,7 +7,7 @@ import { resolve } from 'path';
 import { Command } from 'commander';
 import Joi from 'joi';
 import YAML from 'yaml';
-import { TestConfiguration, DRMConfiguration, ParameterTemplate, ResourceLimits, PrometheusConfiguration, OpenTelemetryConfiguration } from '../types';
+import { TestConfiguration } from '../types';
 
 /**
  * Configuration source types

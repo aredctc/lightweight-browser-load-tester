@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { RequestInterceptor, VariableContext, InterceptedRequest } from './request-interceptor';
-import { ParameterTemplate, StreamingMetrics } from '../types';
+import { RequestInterceptor, InterceptedRequest } from './request-interceptor';
+import { ParameterTemplate } from '../types';
 
 // Mock Playwright types
-const mockRoute = {
+const _mockRoute = {
   continue: vi.fn(),
   fulfill: vi.fn(),
   abort: vi.fn()
@@ -331,7 +331,7 @@ describe('RequestInterceptor', () => {
     });
 
     it('should handle template application errors gracefully', () => {
-      const badTemplate: ParameterTemplate = {
+      const _badTemplate: ParameterTemplate = {
         target: 'header',
         name: 'X-Test',
         valueTemplate: '{{sessionId}}',
