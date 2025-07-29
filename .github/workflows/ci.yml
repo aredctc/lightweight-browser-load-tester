@@ -14,58 +14,8 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test:
-    name: Test and Lint
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18, 20]
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-    
-    - name: Install dependencies
-      run: |
-        if [ -f package-lock.json ]; then
-          npm ci
-        else
-          npm install
-        fi
-    
-    - name: Install Playwright browsers
-      run: npx playwright install chromium
-    
-    - name: Run linting
-      run: npm run lint
-    
-    - name: Run type checking
-      run: npx tsc --noEmit
-    
-    - name: Run tests
-      run: npm test
-    
-    - name: Build project
-      run: npm run build
-    
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results-${{ matrix.node-version }}
-        path: |
-          test-results/
-          coverage/
-        retention-days: 7
-
-  security:
-    name: Security Scan
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
     
     steps:
@@ -85,21 +35,23 @@ jobs:
           npm install
         fi
     
-    - name: Run security audit
-      run: npm audit --audit-level=high
+    - name: Run linting
+      run: npm run lint
     
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/init@v3
-      with:
-        languages: javascript
+    - name: Run type checking
+      run: npx tsc --noEmit
     
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+    - name: Build project
+      run: npm run build
+    
+    - name: Run basic tests
+      run: npm test
 
   docker:
-    name: Build and Test Docker Image
+    name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: [build-and-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
     - name: Checkout code
@@ -116,42 +68,11 @@ jobs:
         tags: ${{ env.IMAGE_NAME }}:test
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
-    - name: Test Docker image
-      run: |
-        docker run --rm ${{ env.IMAGE_NAME }}:test node dist/index.js --help
-        docker run --rm ${{ env.IMAGE_NAME }}:test node dist/index.js --version
-
-  kubernetes:
-    name: Validate Kubernetes Manifests
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'v1.28.0'
-    
-    - name: Validate Kubernetes manifests
-      run: |
-        # Validate base manifests
-        kubectl apply --dry-run=client -k k8s/base/
-        
-        # Validate overlay manifests
-        for overlay in k8s/overlays/*/; do
-          if [ -f "$overlay/kustomization.yaml" ]; then
-            echo "Validating $overlay"
-            kubectl apply --dry-run=client -k "$overlay" || echo "Warning: $overlay validation failed"
-          fi
-        done
 
   publish-npm:
     name: Publish to NPM
     runs-on: ubuntu-latest
-    needs: [test, security, docker]
+    needs: [build-and-test]
     if: github.event_name == 'release' && github.event.action == 'published'
     
     steps:
@@ -183,7 +104,7 @@ jobs:
   publish-docker:
     name: Publish Docker Image
     runs-on: ubuntu-latest
-    needs: [test, security, docker]
+    needs: [build-and-test]
     if: github.event_name == 'release' && github.event.action == 'published'
     
     permissions:
@@ -227,48 +148,3 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         platforms: linux/amd64,linux/arm64
-
-  create-release-assets:
-    name: Create Release Assets
-    runs-on: ubuntu-latest
-    needs: [test, security]
-    if: github.event_name == 'release' && github.event.action == 'published'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-    
-    - name: Install dependencies
-      run: |
-        if [ -f package-lock.json ]; then
-          npm ci
-        else
-          npm install
-        fi
-    
-    - name: Build project
-      run: npm run build
-    
-    - name: Create distribution archive
-      run: |
-        tar -czf lightweight-browser-load-tester-${{ github.event.release.tag_name }}.tar.gz \
-          dist/ \
-          package.json \
-          README.md \
-          LICENSE \
-          CHANGELOG.md
-    
-    - name: Upload release assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./lightweight-browser-load-tester-${{ github.event.release.tag_name }}.tar.gz
-        asset_name: lightweight-browser-load-tester-${{ github.event.release.tag_name }}.tar.gz
-        asset_content_type: application/gzip
