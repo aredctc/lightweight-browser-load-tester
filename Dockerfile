@@ -38,8 +38,8 @@ RUN apk add --no-cache \
     dumb-init
 
 # Create non-root user
-RUN addgroup -g 1000 loadtester && \
-    adduser -D -s /bin/sh -u 1000 -G loadtester loadtester
+RUN addgroup -S loadtester || true && \
+    adduser -D -S -s /bin/sh -G loadtester loadtester
 
 # Set working directory
 WORKDIR /app
