@@ -1,0 +1,130 @@
+# Example configuration demonstrating all randomization features
+# This shows how to use random functions, randomFrom arrays, and randomFromFile
+
+concurrentUsers: 10
+testDuration: 300
+rampUpTime: 30
+streamingUrl: "https://example-streaming.com/live"
+streamingOnly: true
+
+# Resource limits
+resourceLimits:
+  maxMemoryPerInstance: 512
+  maxCpuPercentage: 80
+  maxConcurrentInstances: 20
+
+# Parameter injection with randomization examples
+requestParameters:
+  # Option 1: Built-in random functions
+  - target: header
+    name: "X-Request-ID"
+    valueTemplate: "{{random:uuid}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Session-Token"
+    valueTemplate: "session_{{random:alphanumeric}}_{{random:timestamp}}"
+    scope: per-session
+  
+  - target: query
+    name: "userId"
+    valueTemplate: "{{random:1-10000}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Trace-ID"
+    valueTemplate: "{{random:hex}}"
+    scope: global
+  
+  # Option 2: Random selection from arrays (defined in variable context)
+  - target: header
+    name: "User-Agent"
+    valueTemplate: "{{randomFrom:userAgents}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Device-Type"
+    valueTemplate: "{{randomFrom:deviceTypes}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Client-Version"
+    valueTemplate: "{{randomFrom:clientVersions}}"
+    scope: per-session
+  
+  - target: query
+    name: "platform"
+    valueTemplate: "{{randomFrom:platforms}}"
+    scope: per-session
+  
+  # Option 3: Random selection from external files
+  - target: header
+    name: "Authorization"
+    valueTemplate: "Bearer {{randomFromFile:./test-configs/data/auth-tokens.txt}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Device-ID"
+    valueTemplate: "{{randomFromFile:./test-configs/data/device-ids.txt}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Session-Type"
+    valueTemplate: "{{randomFromFile:./test-configs/data/session-types.txt}}"
+    scope: per-session
+  
+  # Combined examples using multiple randomization methods
+  - target: header
+    name: "X-Complex-Header"
+    valueTemplate: "{{randomFrom:environments}}_{{random:uuid}}_{{randomFromFile:./test-configs/data/session-types.txt}}"
+    scope: per-session
+  
+  - target: body
+    name: "metadata"
+    valueTemplate: '{"sessionId": "{{random:uuid}}", "deviceType": "{{randomFrom:deviceTypes}}", "timestamp": {{random:timestamp}}}'
+    scope: per-session
+
+# Variable context for randomFrom functions
+# Note: In actual implementation, this would be passed to the RequestInterceptor constructor
+# This is shown here for documentation purposes
+variableContext:
+  userAgents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+    - "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15"
+    - "Mozilla/5.0 (Android 14; Mobile; rv:121.0) Gecko/121.0 Firefox/121.0"
+  
+  deviceTypes:
+    - "mobile"
+    - "tablet"
+    - "desktop"
+    - "smart-tv"
+    - "streaming-device"
+  
+  clientVersions:
+    - "1.0.0"
+    - "1.1.0"
+    - "1.2.0"
+    - "2.0.0"
+    - "2.1.0"
+  
+  platforms:
+    - "android"
+    - "ios"
+    - "web"
+    - "roku"
+    - "apple-tv"
+    - "fire-tv"
+  
+  environments:
+    - "prod"
+    - "staging"
+    - "dev"
+
+# Prometheus metrics export
+prometheus:
+  enabled: true
+  remoteWriteUrl: "http://localhost:9090/api/v1/write"
+  batchSize: 100
+  flushInterval: 30

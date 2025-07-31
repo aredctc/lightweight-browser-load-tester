@@ -92,7 +92,13 @@ drmConfig:
 
 ## Parameter Injection
 
-### Header Injection
+The load tester supports dynamic parameter injection with three powerful randomization methods:
+
+1. **Built-in Random Functions** - Generate random values using predefined functions
+2. **Random Selection from Arrays** - Pick random values from arrays defined in variable context
+3. **Random Selection from Files** - Load and randomly select values from external text files
+
+### Basic Parameter Injection
 
 ```yaml
 requestParameters:
@@ -106,18 +112,169 @@ requestParameters:
     scope: per-session
 ```
 
+### Built-in Random Functions
+
+Use `{{random:function}}` syntax to generate random values:
+
+```yaml
+requestParameters:
+  # Generate UUID
+  - target: header
+    name: "X-Request-ID"
+    valueTemplate: "{{random:uuid}}"
+    scope: per-session
+  
+  # Generate random number (0-999999)
+  - target: header
+    name: "X-Random-Number"
+    valueTemplate: "{{random:number}}"
+    scope: per-session
+  
+  # Generate current timestamp
+  - target: header
+    name: "X-Timestamp"
+    valueTemplate: "{{random:timestamp}}"
+    scope: per-session
+  
+  # Generate random hex string
+  - target: header
+    name: "X-Hex-ID"
+    valueTemplate: "{{random:hex}}"
+    scope: per-session
+  
+  # Generate 8-character alphanumeric string
+  - target: header
+    name: "X-Session-Token"
+    valueTemplate: "{{random:alphanumeric}}"
+    scope: per-session
+  
+  # Generate number in specific range
+  - target: query
+    name: "userId"
+    valueTemplate: "{{random:1-10000}}"
+    scope: per-session
+```
+
+**Available Random Functions:**
+- `{{random:uuid}}` - Generates RFC 4122 UUID
+- `{{random:number}}` - Random integer 0-999999
+- `{{random:timestamp}}` - Current timestamp in milliseconds
+- `{{random:hex}}` - Random hexadecimal string
+- `{{random:alphanumeric}}` - 8-character alphanumeric string
+- `{{random:min-max}}` - Random integer in range (e.g., `{{random:1-100}}`)
+
+### Random Selection from Arrays
+
+Use `{{randomFrom:arrayName}}` to randomly select from arrays in variable context:
+
+```yaml
+requestParameters:
+  - target: header
+    name: "User-Agent"
+    valueTemplate: "{{randomFrom:userAgents}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Device-Type"
+    valueTemplate: "{{randomFrom:deviceTypes}}"
+    scope: per-session
+  
+  - target: query
+    name: "platform"
+    valueTemplate: "{{randomFrom:platforms}}"
+    scope: per-session
+
+# Arrays are defined in variable context (passed to RequestInterceptor)
+variableContext:
+  userAgents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+  
+  deviceTypes:
+    - "mobile"
+    - "tablet"
+    - "desktop"
+    - "smart-tv"
+  
+  platforms:
+    - "android"
+    - "ios"
+    - "web"
+    - "roku"
+```
+
+### Random Selection from Files
+
+Use `{{randomFromFile:path}}` to randomly select from external text files:
+
+```yaml
+requestParameters:
+  # Load auth tokens from file
+  - target: header
+    name: "Authorization"
+    valueTemplate: "Bearer {{randomFromFile:./data/auth-tokens.txt}}"
+    scope: per-session
+  
+  # Load device IDs from file
+  - target: header
+    name: "X-Device-ID"
+    valueTemplate: "{{randomFromFile:./data/device-ids.txt}}"
+    scope: per-session
+  
+  # Load user agents from file
+  - target: header
+    name: "User-Agent"
+    valueTemplate: "{{randomFromFile:./data/user-agents.txt}}"
+    scope: per-session
+```
+
+**File Format:**
+- One value per line
+- Empty lines are ignored
+- Lines starting with `#` are treated as comments and ignored
+- Leading/trailing whitespace is trimmed
+
+Example file (`./data/auth-tokens.txt`):
+```
+# Authentication tokens for load testing
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwOTg3NjU0MzIxIiwibmFtZSI6IkphbmUgU21pdGgiLCJpYXQiOjE1MTYyMzkwMjJ9.Gf7leJ8i4e90afOjwQzujBiQ5GL2qRWX4UCAGgOCRFI
+
+# More tokens...
+```
+
+### Combined Randomization
+
+You can combine multiple randomization methods in a single template:
+
+```yaml
+requestParameters:
+  # Complex header combining all methods
+  - target: header
+    name: "X-Complex-Header"
+    valueTemplate: "{{randomFrom:environments}}_{{random:uuid}}_{{randomFromFile:./data/session-types.txt}}"
+    scope: per-session
+  
+  # JSON body with mixed randomization
+  - target: body
+    name: "metadata"
+    valueTemplate: '{"sessionId": "{{random:uuid}}", "deviceType": "{{randomFrom:deviceTypes}}", "timestamp": {{random:timestamp}}, "authLevel": "{{randomFromFile:./data/auth-levels.txt}}"}'
+    scope: per-session
+```
+
 ### Query Parameter Injection
 
 ```yaml
 requestParameters:
   - target: query
     name: "userId"
-    valueTemplate: "user_{{sessionId}}"
+    valueTemplate: "{{random:1-10000}}"
     scope: per-session
   - target: query
-    name: "timestamp"
-    valueTemplate: "{{timestamp}}"
-    scope: global
+    name: "sessionType"
+    valueTemplate: "{{randomFromFile:./data/session-types.txt}}"
+    scope: per-session
 ```
 
 ### Request Body Injection
@@ -126,7 +283,7 @@ requestParameters:
 requestParameters:
   - target: body
     name: "sessionData"
-    valueTemplate: '{"sessionId": "{{sessionId}}", "timestamp": {{timestamp}}}'
+    valueTemplate: '{"sessionId": "{{random:uuid}}", "timestamp": {{random:timestamp}}, "userAgent": "{{randomFrom:userAgents}}"}'
     scope: per-session
 ```
 

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { ResultsAggregator, ReportConfig } from './results-aggregator.js';
+import { ResultsAggregator, ReportConfig } from './results-aggregator';
 import {
   BrowserMetrics,
   DRMMetrics,
   NetworkMetrics,
   ErrorLog,
   PrometheusConfiguration
-} from '../types/index.js';
+} from '../types/index';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -15,7 +15,7 @@ vi.mock('fs/promises');
 vi.mock('path');
 
 // Mock PrometheusExporter
-vi.mock('../exporters/prometheus-exporter.js', () => ({
+vi.mock('../exporters/prometheus-exporter', () => ({
   PrometheusExporter: vi.fn().mockImplementation(() => ({
     exportBrowserMetrics: vi.fn().mockResolvedValue(undefined),
     exportDRMMetrics: vi.fn().mockResolvedValue(undefined),

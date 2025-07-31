@@ -73,6 +73,9 @@ export interface TestConfiguration {
   testDuration: number; // seconds
   rampUpTime: number; // seconds
   streamingUrl: string;
+  streamingOnly?: boolean; // Block all non-streaming requests to save CPU/memory
+  allowedUrls?: string[]; // URL patterns to always allow (even when streamingOnly is enabled)
+  blockedUrls?: string[]; // URL patterns to always block (even if they're streaming-related)
   drmConfig?: DRMConfiguration;
   requestParameters: ParameterTemplate[];
   resourceLimits: ResourceLimits;

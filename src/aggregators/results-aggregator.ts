@@ -5,8 +5,8 @@ import {
     NetworkMetrics,
     ErrorLog,
     PrometheusConfiguration
-} from '../types/index.js';
-import { PrometheusExporter } from '../exporters/prometheus-exporter.js';
+} from '../types/index';
+import { PrometheusExporter } from '../exporters/prometheus-exporter';
 
 /**
  * Configuration for report generation
