@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { PrometheusExporter } from './prometheus-exporter.js';
+import { PrometheusExporter } from './prometheus-exporter';
 import {
   PrometheusConfiguration,
   BrowserMetrics,
@@ -7,7 +7,7 @@ import {
   NetworkMetrics,
   ErrorLog,
   TestSummary
-} from '../types/index.js';
+} from '../types/index';
 
 // Mock fetch globally
 global.fetch = vi.fn();

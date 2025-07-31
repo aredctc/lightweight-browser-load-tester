@@ -67,7 +67,7 @@ export class LoadTesterApp {
       this.setupTestRunnerEvents();
 
       // Start the test
-      await this.testRunner.startTest();
+      this.testRunner.startTest(); // Don't await - this is fire-and-forget
 
       // Wait for test completion or shutdown
       return await this.waitForCompletion();
@@ -356,14 +356,30 @@ async function main(): Promise<void> {
     .option('--otel-protocol <protocol>', 'OpenTelemetry protocol (http/protobuf|http/json|grpc)')
     .option('--otel-service-name <name>', 'OpenTelemetry service name')
     .option('--otel-service-version <version>', 'OpenTelemetry service version')
+    .option('--streaming-only', 'Block all non-streaming requests to save CPU/memory')
+    .option('--allowed-urls <patterns>', 'Comma-separated URL patterns to always allow (even when streaming-only is enabled)')
+    .option('--blocked-urls <patterns>', 'Comma-separated URL patterns to always block (even if streaming-related)')
     .option('--output <file>', 'Output file for results (JSON format)')
     .option('--verbose', 'Enable verbose logging')
     .action(async (options) => {
       try {
         // Parse configuration
+        // Filter CLI args to only include test configuration options, not meta options
+        const testConfigArgs = process.argv.slice(2).filter((arg, index, arr) => {
+          // Skip the command name 'test'
+          if (arg === 'test') return false;
+          
+          // Skip meta options and their values
+          const metaOptions = ['-c', '--config', '--output', '--verbose'];
+          if (metaOptions.includes(arg)) return false;
+          if (index > 0 && metaOptions.includes(arr[index - 1])) return false;
+          
+          return true;
+        });
+
         const { config } = await ConfigurationManager.parseConfiguration({
           configFile: options.config,
-          cliArgs: process.argv
+          cliArgs: testConfigArgs
         });
 
         // Validate required fields
@@ -378,9 +394,13 @@ async function main(): Promise<void> {
 
         // Save results to file if specified
         if (options.output) {
-          const fs = await import('fs/promises');
-          await fs.writeFile(options.output, JSON.stringify(results, null, 2));
-          console.log(`📄 Results saved to ${options.output}`);
+          try {
+            const fs = await import('fs/promises');
+            await fs.writeFile(options.output, JSON.stringify(results, null, 2));
+            console.log(`📄 Results saved to ${options.output}`);
+          } catch (error) {
+            console.error('❌ Error saving results to file:', error);
+          }
         }
 
         process.exit(0);

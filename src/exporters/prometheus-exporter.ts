@@ -5,7 +5,7 @@ import {
     NetworkMetrics,
     ErrorLog,
     TestSummary
-} from '../types/index.js';
+} from '../types/index';
 
 /**
  * Prometheus metric sample in RemoteWrite format

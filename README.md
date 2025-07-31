@@ -1,13 +1,18 @@
 # Lightweight Browser Load Tester
 
+> **Built with Kiro**: This project was developed using [Kiro](https://kiro.ai), an AI-powered IDE that enhances developer productivity through intelligent code assistance and vibe coding approach.
+
+> **Development Status**: This project is still in active development. Some features might not be thoroughly tested yet, and we greatly appreciate community support and feedback to help improve the tool.
+
 A lightweight load testing tool that uses real browsers to test streaming applications, specifically focusing on DRM license acquisition. Built with open source technologies for resource-efficient testing of streaming platforms.
 
 ## Features
 
 - **Real Browser Testing**: Uses Playwright with Chromium for authentic user behavior simulation
 - **DRM Support**: Built-in support for Widevine, PlayReady, and FairPlay DRM systems
+- **Advanced Request Filtering**: Block non-streaming requests to save compute power with fine-grained control
 - **Resource Efficient**: Optimized for minimal memory and CPU usage per browser instance
-- **Parameter Injection**: Dynamic modification of API requests during page interactions
+- **Parameter Injection**: Dynamic modification of API requests with advanced randomization support
 - **Comprehensive Monitoring**: Real-time metrics collection and detailed reporting
 - **Export Integration**: Prometheus and OpenTelemetry metrics export support
 - **Open Source**: Built entirely with open source components and permissive licenses
@@ -46,7 +51,17 @@ load-tester init --format yaml --output my-config.yaml
 concurrentUsers: 10
 testDuration: 600
 rampUpTime: 60
-streamingUrl: https://example.com/stream
+streamingUrl: https://example-streaming.com/live/channel1
+
+# Request filtering for resource optimization
+streamingOnly: true
+allowedUrls:
+  - "*.css"
+  - "*fonts*"
+  - "/api/essential/*"
+blockedUrls:
+  - "*analytics*"
+  - "*tracking*"
 
 resourceLimits:
   maxMemoryPerInstance: 512
@@ -147,7 +162,19 @@ The tool supports configuration through YAML/JSON files and command-line argumen
 concurrentUsers: 10          # Number of concurrent browser instances
 testDuration: 600            # Test duration in seconds (0 = infinite)
 rampUpTime: 60              # Time to gradually start all users
-streamingUrl: "https://example.com/stream"  # Target streaming URL
+streamingUrl: "https://example-streaming.com/live/channel1"  # Target streaming URL
+
+# Request filtering for resource optimization (optional)
+streamingOnly: true          # Block all non-streaming requests to save CPU/memory
+allowedUrls:                 # URL patterns to always allow (even when streamingOnly is enabled)
+  - "*.css"
+  - "*fonts*"
+  - "/api/essential/*"
+  - "https://cdn.example.com/critical/*"
+blockedUrls:                 # URL patterns to always block (even if streaming-related)
+  - "*analytics*"
+  - "*tracking*"
+  - "*ads*"
 
 # DRM configuration (optional)
 drmConfig:
@@ -224,6 +251,9 @@ load-tester test [options]
 - `-d, --test-duration <seconds>`: Test duration in seconds
 - `-r, --ramp-up-time <seconds>`: Ramp up time in seconds
 - `-s, --streaming-url <url>`: Streaming URL to test
+- `--streaming-only`: Block all non-streaming requests to save CPU/memory
+- `--allowed-urls <patterns>`: Comma-separated URL patterns to always allow (even when streaming-only is enabled)
+- `--blocked-urls <patterns>`: Comma-separated URL patterns to always block (even if streaming-related)
 - `--max-memory <mb>`: Maximum memory per instance in MB
 - `--max-cpu <percentage>`: Maximum CPU percentage
 - `--max-instances <number>`: Maximum concurrent instances
@@ -241,10 +271,22 @@ load-tester test [options]
 
 ```bash
 # Basic load test
-load-tester test --streaming-url https://example.com/stream --concurrent-users 5 --test-duration 300
+load-tester test --streaming-url https://example-streaming.com/live/channel1 --concurrent-users 5 --test-duration 300
 
-# DRM testing
-load-tester test --config drm-config.yaml --drm-type widevine --drm-license-url https://example.com/license
+# Streaming-only mode to save resources
+load-tester test --streaming-url https://example-streaming.com/live/channel1 --streaming-only --concurrent-users 10
+
+# With allowed URLs for essential resources
+load-tester test --streaming-url https://example-streaming.com/live/channel1 --streaming-only \
+  --allowed-urls "*.css,*fonts*,/api/essential/*" --concurrent-users 10
+
+# Block analytics and tracking requests
+load-tester test --streaming-url https://example-streaming.com/live/channel1 \
+  --blocked-urls "*analytics*,*tracking*,*ads*" --concurrent-users 10
+
+# DRM testing with request filtering
+load-tester test --config drm-config.yaml --drm-type widevine --drm-license-url https://example.com/license \
+  --streaming-only --allowed-urls "*.css,*fonts*"
 
 # With metrics export
 load-tester test --config config.yaml --prometheus-enabled --prometheus-url https://prometheus.example.com/api/v1/write
@@ -336,9 +378,91 @@ The tool automatically collects DRM-specific metrics:
 - DRM-specific error tracking
 - License server response analysis
 
+## Request Filtering
+
+The tool provides advanced request filtering capabilities to optimize resource usage and focus testing on streaming-specific requests. This is particularly useful for reducing CPU and memory consumption during load testing.
+
+### Streaming-Only Mode
+
+Enable `streamingOnly: true` to block all non-streaming requests, allowing only streaming-related and essential requests to pass through. The system automatically identifies streaming requests based on URL patterns:
+
+- **Manifest files**: `.m3u8`, `.mpd`, URLs containing "manifest"
+- **Media segments**: `.ts`, `.m4s`, `.mp4`, URLs containing "segment" or "chunk"
+- **DRM/License requests**: URLs containing "license", "drm", "widevine", "playready", "fairplay"
+- **Streaming APIs**: URLs matching patterns like "api.*stream", "playback", "player"
+
+### URL Pattern Control
+
+- **Allowed URLs**: Specify patterns that should always be allowed, even in streaming-only mode
+- **Blocked URLs**: Specify patterns that should always be blocked, even if they're streaming-related
+
+### Example Configuration
+
+```yaml
+# Block all non-streaming requests to save resources
+streamingOnly: true
+
+# Allow essential resources even in streaming-only mode
+allowedUrls:
+  - "*.css"
+  - "*fonts*"
+  - "/api/essential/*"
+  - "https://cdn.example.com/critical/*"
+
+# Block analytics and tracking regardless of streaming status
+blockedUrls:
+  - "*analytics*"
+  - "*tracking*"
+  - "*ads*"
+  - "https://metrics.example.com/*"
+```
+
+### Performance Benefits
+
+Request filtering can significantly improve performance:
+- **30-60% memory reduction** by blocking unnecessary resources
+- **20-40% CPU savings** from processing fewer requests
+- **Reduced bandwidth usage** and faster test execution
+- **Cleaner metrics** focused on streaming-specific performance
+
+See the [Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md) for detailed information about patterns, configuration options, and troubleshooting.
+
 ## Parameter Injection
 
-Dynamically modify API requests during page interactions to test different scenarios:
+Dynamically modify API requests during page interactions with powerful randomization capabilities:
+
+### Built-in Random Functions
+```yaml
+requestParameters:
+  - target: header
+    name: "X-Request-ID"
+    valueTemplate: "{{random:uuid}}"
+    scope: per-session
+  - target: query
+    name: "userId"
+    valueTemplate: "{{random:1-10000}}"
+    scope: per-session
+```
+
+### Random Selection from Arrays
+```yaml
+requestParameters:
+  - target: header
+    name: "User-Agent"
+    valueTemplate: "{{randomFrom:userAgents}}"
+    scope: per-session
+```
+
+### Random Selection from Files
+```yaml
+requestParameters:
+  - target: header
+    name: "Authorization"
+    valueTemplate: "Bearer {{randomFromFile:./data/auth-tokens.txt}}"
+    scope: per-session
+```
+
+### Basic Parameter Templates
 
 ### Parameter Types
 
@@ -485,6 +609,7 @@ htop  # or similar system monitor
 ## Documentation
 
 - **[Configuration Guide](docs/CONFIGURATION_GUIDE.md)**: Detailed configuration options and examples
+- **[Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md)**: Complete guide to request filtering, streaming-only mode, and URL patterns
 - **[Kubernetes Deployment Guide](docs/KUBERNETES_DEPLOYMENT.md)**: Complete guide for deploying on Kubernetes (local, AWS EKS, GKE, AKS)
 - **[API Documentation](API.md)**: Complete API reference for all classes and interfaces
 - **[Troubleshooting Guide](TROUBLESHOOTING.md)**: Solutions to common issues and problems

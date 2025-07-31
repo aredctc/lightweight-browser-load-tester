@@ -1,5 +1,7 @@
 import { Page, Request, Response } from 'playwright';
 import { ParameterTemplate, NetworkMetrics, ErrorLog, StreamingMetrics, StreamingError } from '../types';
+import { readFileSync } from 'fs';
+import { randomUUID } from 'crypto';
 
 /**
  * Variable context for parameter template substitution
@@ -9,6 +11,16 @@ export interface VariableContext {
     timestamp: number;
     requestCount: number;
     [key: string]: any;
+}
+
+/**
+ * Cache for file-based random data to avoid repeated file reads
+ */
+interface FileDataCache {
+    [filePath: string]: {
+        data: string[];
+        lastModified: number;
+    };
 }
 
 /**
@@ -46,14 +58,25 @@ export class RequestInterceptor {
     private streamingErrors: StreamingError[] = [];
     private requestCount = 0;
     private streamingStartTime: number = 0;
+    private streamingOnly: boolean = false;
+    private blockedRequestCount = 0;
+    private allowedUrls: string[] = [];
+    private blockedUrls: string[] = [];
+    private fileDataCache: FileDataCache = {};
 
     constructor(
         page: Page,
         parameterTemplates: ParameterTemplate[] = [],
-        initialContext: Partial<VariableContext> = {}
+        initialContext: Partial<VariableContext> = {},
+        streamingOnly: boolean = false,
+        allowedUrls: string[] = [],
+        blockedUrls: string[] = []
     ) {
         this.page = page;
         this.parameterTemplates = parameterTemplates;
+        this.streamingOnly = streamingOnly;
+        this.allowedUrls = allowedUrls;
+        this.blockedUrls = blockedUrls;
         this.variableContext = {
             sessionId: `session_${Date.now()}`,
             timestamp: Date.now(),
@@ -133,11 +156,18 @@ export class RequestInterceptor {
     }
 
     /**
+     * Get the number of blocked requests (when streamingOnly is enabled)
+     */
+    getBlockedRequestCount(): number {
+        return this.blockedRequestCount;
+    }
+
+    /**
      * Get aggregated streaming metrics
      */
     getStreamingMetrics(): StreamingMetrics {
         const streamingRequests = this.networkMetrics.filter(m => m.isStreamingRelated);
-        
+
         const manifestRequests = streamingRequests.filter(m => m.streamingType === 'manifest');
         const segmentRequests = streamingRequests.filter(m => m.streamingType === 'segment');
         const licenseRequests = streamingRequests.filter(m => m.streamingType === 'license');
@@ -188,8 +218,34 @@ export class RequestInterceptor {
             this.requestCount++;
             this.variableContext.requestCount = this.requestCount;
 
+            const url = request.url();
+
+            // Priority 1: Check if URL is explicitly blocked (highest priority)
+            if (this.isBlockedUrl(url)) {
+                this.blockedRequestCount++;
+                await route.abort('blockedbyclient');
+                return;
+            }
+
+            // Priority 2: Check if URL is explicitly allowed (overrides streaming-only mode)
+            if (this.isAllowedUrl(url)) {
+                // Allow the request to continue (skip streaming-only check)
+            }
+            // Priority 3: Apply streaming-only logic if not explicitly allowed
+            else if (this.streamingOnly && !this.isStreamingRequest(url) && !this.isEssentialRequest(url)) {
+                this.blockedRequestCount++;
+                await route.abort('blockedbyclient');
+                return;
+            }
+
+            // Store request start time for manual timing calculation
+            const requestStartTime = Date.now();
+
+            // Store timing info for this request
+            (request as any)._startTime = requestStartTime;
+
             const interceptedRequest: InterceptedRequest = {
-                url: request.url(),
+                url,
                 method: request.method(),
                 headers: request.headers(),
                 postData: request.postData() || undefined
@@ -289,13 +345,159 @@ export class RequestInterceptor {
     }
 
     /**
-     * Substitute variables in template string
+     * Substitute variables in template string with support for random functions
      */
     private substituteVariables(template: string): string {
-        return template.replace(/\{\{(\w+)\}\}/g, (match, variableName) => {
-            const value = this.variableContext[variableName];
-            return value !== undefined ? String(value) : match;
+        return template.replace(/\{\{([^}]+)\}\}/g, (match, expression) => {
+            try {
+                // Handle random functions
+                if (expression.startsWith('random:')) {
+                    return this.handleRandomFunction(expression);
+                }
+                
+                // Handle randomFrom functions
+                if (expression.startsWith('randomFrom:')) {
+                    return this.handleRandomFromFunction(expression);
+                }
+                
+                // Handle randomFromFile functions
+                if (expression.startsWith('randomFromFile:')) {
+                    return this.handleRandomFromFileFunction(expression);
+                }
+                
+                // Handle regular variable substitution
+                const value = this.variableContext[expression.trim()];
+                return value !== undefined ? String(value) : match;
+            } catch (error) {
+                this.logError('Failed to substitute variable', error, { expression, template });
+                return match;
+            }
         });
+    }
+
+    /**
+     * Handle random function calls (e.g., {{random:uuid}}, {{random:number}})
+     */
+    private handleRandomFunction(expression: string): string {
+        const functionName = expression.substring(7); // Remove 'random:'
+        
+        switch (functionName) {
+            case 'uuid': {
+                return randomUUID();
+            }
+            
+            case 'number': {
+                return Math.floor(Math.random() * 1000000).toString();
+            }
+            
+            case 'timestamp': {
+                return Date.now().toString();
+            }
+            
+            case 'hex': {
+                return Math.floor(Math.random() * 16777215).toString(16);
+            }
+            
+            case 'alphanumeric': {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < 8; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+            
+            default: {
+                // Check if it's a range function like random:1-100
+                const rangeMatch = functionName.match(/^(\d+)-(\d+)$/);
+                if (rangeMatch) {
+                    const min = parseInt(rangeMatch[1], 10);
+                    const max = parseInt(rangeMatch[2], 10);
+                    return (Math.floor(Math.random() * (max - min + 1)) + min).toString();
+                }
+                
+                this.logError('Unknown random function', null, { functionName });
+                return expression;
+            }
+        }
+    }
+
+    /**
+     * Handle randomFrom function calls (e.g., {{randomFrom:arrayName}})
+     */
+    private handleRandomFromFunction(expression: string): string {
+        const arrayName = expression.substring(11); // Remove 'randomFrom:'
+        const array = this.variableContext[arrayName];
+        
+        if (!Array.isArray(array)) {
+            this.logError('randomFrom target is not an array', null, { arrayName, type: typeof array });
+            return expression;
+        }
+        
+        if (array.length === 0) {
+            this.logError('randomFrom target array is empty', null, { arrayName });
+            return expression;
+        }
+        
+        const randomIndex = Math.floor(Math.random() * array.length);
+        return String(array[randomIndex]);
+    }
+
+    /**
+     * Handle randomFromFile function calls (e.g., {{randomFromFile:./data/values.txt}})
+     */
+    private handleRandomFromFileFunction(expression: string): string {
+        const filePath = expression.substring(15); // Remove 'randomFromFile:'
+        
+        try {
+            // Check cache first
+            const cachedData = this.getCachedFileData(filePath);
+            if (cachedData && cachedData.length > 0) {
+                const randomIndex = Math.floor(Math.random() * cachedData.length);
+                return cachedData[randomIndex];
+            }
+            
+            this.logError('File data is empty or could not be loaded', null, { filePath });
+            return expression;
+        } catch (error) {
+            this.logError('Failed to read random data from file', error, { filePath });
+            return expression;
+        }
+    }
+
+    /**
+     * Get cached file data or load from file system
+     */
+    private getCachedFileData(filePath: string): string[] | null {
+        try {
+            // Get file stats to check if file has been modified
+            const fs = require('fs');
+            const stats = fs.statSync(filePath);
+            const lastModified = stats.mtime.getTime();
+            
+            // Check if we have cached data and it's still valid
+            const cached = this.fileDataCache[filePath];
+            if (cached && cached.lastModified >= lastModified) {
+                return cached.data;
+            }
+            
+            // Read file and cache the data
+            const fileContent = readFileSync(filePath, 'utf-8');
+            const lines = fileContent
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0 && !line.startsWith('#')); // Filter empty lines and comments
+            
+            this.fileDataCache[filePath] = {
+                data: lines,
+                lastModified
+            };
+            
+            return lines;
+        } catch (error) {
+            this.logError('Failed to load file data', error, { filePath });
+            return null;
+        }
     }
 
     /**
@@ -371,11 +573,22 @@ export class RequestInterceptor {
             const request = response.request();
             const timing = response.request().timing();
             const url = request.url();
+            const responseEndTime = Date.now();
+
+            // Calculate response time using manual timing (more reliable than Playwright timing)
+            let responseTime = 0;
+            const requestStartTime = (request as any)._startTime;
+            if (requestStartTime) {
+                responseTime = responseEndTime - requestStartTime;
+            } else if (timing && timing.requestStart && timing.responseEnd) {
+                // Fallback to Playwright timing if manual timing is not available
+                responseTime = timing.responseEnd - timing.requestStart;
+            }
 
             const metric: NetworkMetrics = {
                 url,
                 method: request.method(),
-                responseTime: timing ? Math.max(0, timing.responseEnd - timing.requestStart) : 0,
+                responseTime,
                 statusCode: response.status(),
                 timestamp: new Date(),
                 requestSize: this.calculateRequestSize(request),
@@ -441,14 +654,14 @@ export class RequestInterceptor {
             if (contentLength) {
                 return parseInt(contentLength, 10);
             }
-            
+
             // If no content-length, estimate based on headers
             let size = 0;
             const headers = response.headers();
             for (const [key, value] of Object.entries(headers)) {
                 size += key.length + value.length + 4; // +4 for ": " and "\r\n"
             }
-            
+
             return size;
         } catch {
             return 0;
@@ -464,35 +677,114 @@ export class RequestInterceptor {
             /\.m3u8(\?|$)/i,
             /\.mpd(\?|$)/i,
             /manifest/i,
-            
+
             // Media segments
             /\.ts(\?|$)/i,
             /\.m4s(\?|$)/i,
             /\.mp4(\?|$)/i,
             /segment/i,
             /chunk/i,
-            
+
             // DRM/License requests
             /license/i,
             /drm/i,
             /widevine/i,
             /playready/i,
             /fairplay/i,
-            
+
             // Streaming APIs
             /api.*stream/i,
             /stream.*api/i,
             /playback/i,
-            /player/i,
-            
-            // DAZN specific patterns
-            /dazn.*stream/i,
-            /dazn.*playback/i,
-            /dazn.*manifest/i,
-            /dazn.*license/i
+            /player/i
         ];
 
         return streamingPatterns.some(pattern => pattern.test(url));
+    }
+
+    /**
+     * Check if request is essential for page functionality (should not be blocked even in streaming-only mode)
+     */
+    private isEssentialRequest(url: string): boolean {
+        const essentialPatterns = [
+            // Main page document
+            /^https?:\/\/[^/]+\/?$/,
+            /\/live\?/i,
+            /\/start\/?$/i,
+
+            // Essential JavaScript and CSS for page functionality
+            /\/_next\/static\/chunks\/main-/i,
+            /\/_next\/static\/chunks\/framework-/i,
+            /\/_next\/static\/chunks\/webpack-/i,
+            /\/_next\/static\/chunks\/pages\/_app-/i,
+            /\/_next\/static\/css\//i,
+
+            // Authentication and session management
+            /\/api\/auth\//i,
+            /\/session/i,
+
+            // Essential data for streaming setup
+            /\/api\/domain\/player-token/i,
+            /\/stream-link/i,
+
+            // Document resources (HTML, main page data)
+            /\/_next\/data\//i,
+            /\.html(\?|$)/i,
+
+            // Favicon and essential icons
+            /favicon\.ico/i,
+            /\/icon-/i
+        ];
+
+        return essentialPatterns.some(pattern => pattern.test(url));
+    }
+
+    /**
+     * Check if URL matches any of the allowed URL patterns
+     */
+    private isAllowedUrl(url: string): boolean {
+        if (this.allowedUrls.length === 0) {
+            return false;
+        }
+        return this.allowedUrls.some(pattern => this.matchesUrlPattern(url, pattern));
+    }
+
+    /**
+     * Check if URL matches any of the blocked URL patterns
+     */
+    private isBlockedUrl(url: string): boolean {
+        if (this.blockedUrls.length === 0) {
+            return false;
+        }
+        return this.blockedUrls.some(pattern => this.matchesUrlPattern(url, pattern));
+    }
+
+    /**
+     * Check if URL matches a pattern (supports wildcards and regex-like patterns)
+     */
+    private matchesUrlPattern(url: string, pattern: string): boolean {
+        try {
+            // If pattern starts and ends with /, treat as regex
+            if (pattern.startsWith('/') && pattern.endsWith('/')) {
+                const regexPattern = pattern.slice(1, -1);
+                const regex = new RegExp(regexPattern, 'i');
+                return regex.test(url);
+            }
+
+            // Convert glob-like pattern to regex
+            // Escape special regex characters except * and ?
+            const escapedPattern = pattern
+                .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+                .replace(/\*/g, '.*')
+                .replace(/\?/g, '.');
+
+            const regex = new RegExp(`^${escapedPattern}$`, 'i');
+            return regex.test(url);
+        } catch (error) {
+            // If pattern is invalid, fall back to simple string matching
+            this.logError('Invalid URL pattern', error, { pattern, url });
+            return url.toLowerCase().includes(pattern.toLowerCase());
+        }
     }
 
     /**
@@ -542,9 +834,9 @@ export class RequestInterceptor {
      * Log streaming-specific error
      */
     private logStreamingError(
-        url: string, 
-        statusCode: number, 
-        errorType: StreamingError['errorType'], 
+        url: string,
+        statusCode: number,
+        errorType: StreamingError['errorType'],
         message: string,
         context?: Record<string, any>
     ): void {

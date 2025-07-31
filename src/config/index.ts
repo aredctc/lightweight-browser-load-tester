@@ -92,6 +92,9 @@ const testConfigurationSchema = Joi.object({
   testDuration: Joi.number().integer().min(1).required(),
   rampUpTime: Joi.number().integer().min(0).required(),
   streamingUrl: Joi.string().uri().required(),
+  streamingOnly: Joi.boolean().optional().default(false),
+  allowedUrls: Joi.array().items(Joi.string()).optional().default([]),
+  blockedUrls: Joi.array().items(Joi.string()).optional().default([]),
   drmConfig: drmConfigSchema.optional(),
   requestParameters: Joi.array().items(parameterTemplateSchema).default([]),
   resourceLimits: resourceLimitsSchema.required(),
@@ -107,6 +110,9 @@ const DEFAULT_CONFIG: TestConfiguration = {
   testDuration: 60,
   rampUpTime: 10,
   streamingUrl: '',
+  streamingOnly: false,
+  allowedUrls: [],
+  blockedUrls: [],
   requestParameters: [],
   resourceLimits: {
     maxMemoryPerInstance: 512,
@@ -123,6 +129,9 @@ const ENV_MAPPINGS: Record<string, string> = {
   'LOAD_TEST_DURATION': 'testDuration',
   'LOAD_TEST_RAMP_UP': 'rampUpTime',
   'LOAD_TEST_STREAMING_URL': 'streamingUrl',
+  'LOAD_TEST_STREAMING_ONLY': 'streamingOnly',
+  'LOAD_TEST_ALLOWED_URLS': 'allowedUrls',
+  'LOAD_TEST_BLOCKED_URLS': 'blockedUrls',
   'LOAD_TEST_MAX_MEMORY': 'resourceLimits.maxMemoryPerInstance',
   'LOAD_TEST_MAX_CPU': 'resourceLimits.maxCpuPercentage',
   'LOAD_TEST_MAX_INSTANCES': 'resourceLimits.maxConcurrentInstances',
@@ -311,7 +320,10 @@ export class ConfigurationManager {
       .option('--otel-service-version <version>', 'OpenTelemetry service version')
       .option('--otel-timeout <ms>', 'OpenTelemetry request timeout in milliseconds', parseInt)
       .option('--otel-compression <type>', 'OpenTelemetry compression (gzip|none)')
-      .option('--otel-batch-timeout <ms>', 'OpenTelemetry batch timeout in milliseconds', parseInt);
+      .option('--otel-batch-timeout <ms>', 'OpenTelemetry batch timeout in milliseconds', parseInt)
+      .option('--streaming-only', 'Block all non-streaming requests to save CPU/memory')
+      .option('--allowed-urls <patterns>', 'Comma-separated URL patterns to always allow (even when streaming-only is enabled)')
+      .option('--blocked-urls <patterns>', 'Comma-separated URL patterns to always block (even if streaming-related)');
 
     program.parse(args, { from: 'user' });
     const options = program.opts();
@@ -362,6 +374,16 @@ export class ConfigurationManager {
       if (options.otelTimeout !== undefined) config.opentelemetry.timeout = options.otelTimeout;
       if (options.otelCompression !== undefined) config.opentelemetry.compression = options.otelCompression;
       if (options.otelBatchTimeout !== undefined) config.opentelemetry.batchTimeout = options.otelBatchTimeout;
+    }
+
+    if (options.streamingOnly !== undefined) config.streamingOnly = options.streamingOnly;
+
+    // Parse URL patterns (comma-separated strings to arrays)
+    if (options.allowedUrls !== undefined) {
+      config.allowedUrls = options.allowedUrls.split(',').map((url: string) => url.trim()).filter((url: string) => url.length > 0);
+    }
+    if (options.blockedUrls !== undefined) {
+      config.blockedUrls = options.blockedUrls.split(',').map((url: string) => url.trim()).filter((url: string) => url.length > 0);
     }
 
     return config;
@@ -428,6 +450,11 @@ export class ConfigurationManager {
     if (value.toLowerCase() === 'true') return true;
     if (value.toLowerCase() === 'false') return false;
 
+    // Try to parse as comma-separated array
+    if (value.includes(',')) {
+      return value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
     // Return as string
     return value;
   }
@@ -472,6 +499,9 @@ export class ConfigurationManager {
       testDuration: 300,
       rampUpTime: 30,
       streamingUrl: 'https://example.com/stream',
+      streamingOnly: false,
+      allowedUrls: ['*manifest*', '*playlist*'],
+      blockedUrls: ['*analytics*', '*tracking*'],
       drmConfig: {
         type: 'widevine',
         licenseUrl: 'https://example.com/license',

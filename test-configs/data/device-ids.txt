@@ -1,0 +1,16 @@
+# Sample device IDs for testing different device types
+android-phone-001
+android-phone-002
+android-tablet-001
+ios-phone-001
+ios-phone-002
+ios-tablet-001
+web-chrome-desktop-001
+web-firefox-desktop-001
+web-safari-desktop-001
+smart-tv-samsung-001
+smart-tv-lg-001
+roku-device-001
+apple-tv-001
+chromecast-001
+fire-tv-001

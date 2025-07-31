@@ -543,7 +543,10 @@ export class TestRunner extends EventEmitter {
       const interceptor = new RequestInterceptor(
         browserInstance.page,
         this.config.requestParameters,
-        { sessionId }
+        { sessionId },
+        this.config.streamingOnly || false,
+        this.config.allowedUrls || [],
+        this.config.blockedUrls || []
       );
       
       // Create session

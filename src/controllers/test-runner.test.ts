@@ -542,4 +542,211 @@ describe('TestRunner', () => {
       expect(testRunner.isTestRunning()).toBe(false);
     });
   });
+
+  // NEW TESTS FOR URL FILTERING FUNCTIONALITY
+  describe('URL filtering integration', () => {
+    it('should create RequestInterceptor with default URL filtering parameters', async () => {
+      vi.useFakeTimers();
+      
+      const startPromise = testRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called with correct parameters
+      expect(MockRequestInterceptor).toHaveBeenCalledWith(
+        mockPage,
+        testConfig.requestParameters,
+        expect.objectContaining({ sessionId: expect.any(String) }),
+        false, // streamingOnly default
+        [], // allowedUrls default
+        [] // blockedUrls default
+      );
+    });
+
+    it('should create RequestInterceptor with streaming-only mode enabled', async () => {
+      vi.useFakeTimers();
+      
+      const streamingOnlyConfig = {
+        ...testConfig,
+        streamingOnly: true
+      };
+
+      const streamingOnlyRunner = new TestRunner(streamingOnlyConfig);
+      
+      const startPromise = streamingOnlyRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called with streaming-only enabled
+      expect(MockRequestInterceptor).toHaveBeenCalledWith(
+        mockPage,
+        streamingOnlyConfig.requestParameters,
+        expect.objectContaining({ sessionId: expect.any(String) }),
+        true, // streamingOnly enabled
+        [], // allowedUrls default
+        [] // blockedUrls default
+      );
+    });
+
+    it('should create RequestInterceptor with allowed URLs configured', async () => {
+      vi.useFakeTimers();
+      
+      const allowedUrlsConfig = {
+        ...testConfig,
+        streamingOnly: true,
+        allowedUrls: ['*.css', '*fonts*', '/api/essential/']
+      };
+
+      const allowedUrlsRunner = new TestRunner(allowedUrlsConfig);
+      
+      const startPromise = allowedUrlsRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called with allowed URLs
+      expect(MockRequestInterceptor).toHaveBeenCalledWith(
+        mockPage,
+        allowedUrlsConfig.requestParameters,
+        expect.objectContaining({ sessionId: expect.any(String) }),
+        true, // streamingOnly enabled
+        ['*.css', '*fonts*', '/api/essential/'], // allowedUrls
+        [] // blockedUrls default
+      );
+    });
+
+    it('should create RequestInterceptor with blocked URLs configured', async () => {
+      vi.useFakeTimers();
+      
+      const blockedUrlsConfig = {
+        ...testConfig,
+        blockedUrls: ['*analytics*', '*tracking*', '/ads/']
+      };
+
+      const blockedUrlsRunner = new TestRunner(blockedUrlsConfig);
+      
+      const startPromise = blockedUrlsRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called with blocked URLs
+      expect(MockRequestInterceptor).toHaveBeenCalledWith(
+        mockPage,
+        blockedUrlsConfig.requestParameters,
+        expect.objectContaining({ sessionId: expect.any(String) }),
+        false, // streamingOnly default
+        [], // allowedUrls default
+        ['*analytics*', '*tracking*', '/ads/'] // blockedUrls
+      );
+    });
+
+    it('should create RequestInterceptor with all URL filtering options configured', async () => {
+      vi.useFakeTimers();
+      
+      const fullFilteringConfig = {
+        ...testConfig,
+        streamingOnly: true,
+        allowedUrls: ['*.css', '*fonts*'],
+        blockedUrls: ['*analytics*', '*tracking*']
+      };
+
+      const fullFilteringRunner = new TestRunner(fullFilteringConfig);
+      
+      const startPromise = fullFilteringRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called with all filtering options
+      expect(MockRequestInterceptor).toHaveBeenCalledWith(
+        mockPage,
+        fullFilteringConfig.requestParameters,
+        expect.objectContaining({ sessionId: expect.any(String) }),
+        true, // streamingOnly enabled
+        ['*.css', '*fonts*'], // allowedUrls
+        ['*analytics*', '*tracking*'] // blockedUrls
+      );
+    });
+
+    it('should handle undefined URL filtering options gracefully', async () => {
+      vi.useFakeTimers();
+      
+      const undefinedOptionsConfig = {
+        ...testConfig,
+        streamingOnly: undefined,
+        allowedUrls: undefined,
+        blockedUrls: undefined
+      };
+
+      const undefinedOptionsRunner = new TestRunner(undefinedOptionsConfig);
+      
+      const startPromise = undefinedOptionsRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called with default values for undefined options
+      expect(MockRequestInterceptor).toHaveBeenCalledWith(
+        mockPage,
+        undefinedOptionsConfig.requestParameters,
+        expect.objectContaining({ sessionId: expect.any(String) }),
+        false, // streamingOnly defaults to false
+        [], // allowedUrls defaults to empty array
+        [] // blockedUrls defaults to empty array
+      );
+    });
+
+    it('should create separate RequestInterceptor instances for each session with same configuration', async () => {
+      vi.useFakeTimers();
+      
+      const multiSessionConfig = {
+        ...testConfig,
+        concurrentUsers: 3,
+        streamingOnly: true,
+        allowedUrls: ['*.css'],
+        blockedUrls: ['*analytics*']
+      };
+
+      const multiSessionRunner = new TestRunner(multiSessionConfig);
+      
+      const startPromise = multiSessionRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Verify RequestInterceptor was called once for each session
+      expect(MockRequestInterceptor).toHaveBeenCalledTimes(3);
+      
+      // Verify all calls had the same configuration
+      const calls = MockRequestInterceptor.mock.calls;
+      calls.forEach(call => {
+        expect(call).toEqual([
+          mockPage,
+          multiSessionConfig.requestParameters,
+          expect.objectContaining({ sessionId: expect.any(String) }),
+          true, // streamingOnly
+          ['*.css'], // allowedUrls
+          ['*analytics*'] // blockedUrls
+        ]);
+      });
+    });
+  });
+
+  describe('blocked request tracking integration', () => {
+    beforeEach(() => {
+      // Add getBlockedRequestCount method to mock interceptor
+      mockInterceptor.getBlockedRequestCount = vi.fn().mockReturnValue(5);
+    });
+
+    it('should access blocked request count from interceptor', async () => {
+      vi.useFakeTimers();
+      
+      const startPromise = testRunner.startTest();
+      await vi.advanceTimersByTimeAsync(testConfig.rampUpTime * 1000);
+      await startPromise;
+
+      // Simulate accessing blocked request count (this would be used in monitoring)
+      const interceptorInstance = MockRequestInterceptor.mock.results[0].value;
+      const blockedCount = interceptorInstance.getBlockedRequestCount();
+
+      expect(blockedCount).toBe(5);
+      expect(mockInterceptor.getBlockedRequestCount).toHaveBeenCalled();
+    });
+  });
 });
