@@ -1,8 +1,8 @@
-# 🚀 Lightweight Browser Load Tester v1.0.0-rc.4
+# 🚀 Lightweight Browser Load Tester v1.0.0-rc.5
 
-## 🎉 Release Candidate 4 - Authenticated Session Simulation!
+## 🎉 Release Candidate 5 - Browser Control & DRM Compatibility!
 
-We're thrilled to announce the fourth iteration of our release candidate! This version introduces groundbreaking localStorage functionality for authenticated session simulation, along with comprehensive randomization support. Building upon the solid foundation of previous releases, RC4 delivers enterprise-grade load testing capabilities with realistic user behavior simulation for streaming applications and web platforms.
+We're excited to announce the fifth iteration of our release candidate! This version introduces comprehensive browser control capabilities and intelligent DRM compatibility features. Building upon the robust foundation of previous releases, RC5 delivers enhanced debugging capabilities and resolves critical DRM playback issues, making it the most developer-friendly and DRM-compatible version yet.
 
 ## ✨ Key Features
 
@@ -49,6 +49,20 @@ We're thrilled to announce the fourth iteration of our release candidate! This v
 - **Smart Pattern Matching** - Support for wildcards, regex patterns, and exact matching
 - **Resource Optimization** - 30-60% memory reduction and 20-40% CPU savings
 
+### 🔧 **Configurable Browser Options** ⭐ NEW IN RC5
+- **Headless Mode Control** - Toggle browser visibility for debugging (`headless: true/false`)
+- **Custom Browser Arguments** - Full control over Chromium browser behavior with 50+ supported arguments
+- **Debugging Support** - DevTools integration, remote debugging, verbose logging capabilities
+- **Performance Tuning** - Memory limits, CPU optimization, cache management, and resource control
+- **DRM Optimization** - Hardware acceleration, codec support, and content protection settings
+
+### 🤖 **Intelligent DRM Compatibility** ⭐ NEW IN RC5
+- **Automatic DRM Detection** - Smart detection of DRM configuration with automatic browser optimization
+- **Headless Override** - Automatically disables headless mode when DRM is detected (Widevine requires display context)
+- **Hardware Security Handling** - Proper configuration for Widevine L1 hardware-backed security requirements
+- **EME Optimization** - Enhanced Encrypted Media Extensions support for all DRM systems
+- **User Notifications** - Clear warnings when DRM overrides browser configuration
+
 ### � **Authenthicated Session Simulation** ⭐ NEW IN RC4
 - **Browser localStorage Pre-population** - Simulate authenticated users with pre-configured localStorage data
 - **Multi-Domain Support** - Set localStorage for multiple domains (main app, API, CDN, etc.)
@@ -71,14 +85,14 @@ We're thrilled to announce the fourth iteration of our release candidate! This v
 
 ## 📦 Installation
 
-### NPM Package (Release Candidate 4)
+### NPM Package (Release Candidate 5)
 ```bash
 # Install the latest RC version
 npm install -g lightweight-browser-load-tester@rc
 load-tester --help
 
-# Or install specific RC4 version
-npm install -g lightweight-browser-load-tester@1.0.0-rc.4
+# Or install specific RC5 version
+npm install -g lightweight-browser-load-tester@1.0.0-rc.5
 ```
 
 ### Docker Image
@@ -105,7 +119,22 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
    testDuration: 300
    streamingUrl: "https://your-streaming-service.com/stream"
    
-   # NEW IN RC4: Authenticated session simulation with localStorage
+   # NEW IN RC5: Browser control and DRM compatibility
+   browserOptions:
+     headless: false  # Enable for debugging or DRM content
+     args:
+       - "--auto-open-devtools-for-tabs"  # Open DevTools automatically
+       - "--start-maximized"              # Start browser maximized
+       - "--enable-logging"               # Enable verbose logging
+   
+   # DRM configuration (automatically disables headless mode)
+   drmConfig:
+     type: widevine
+     licenseUrl: "https://your-drm-service.com/license"
+     customHeaders:
+       Authorization: "Bearer your-drm-token"
+   
+   # Authenticated session simulation with localStorage (RC4)
    localStorage:
      - domain: "your-streaming-service.com"
        data:
@@ -228,7 +257,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Special thanks to all contributors and the open-source community for making this project possible.
 
-## 🆕 What's New in RC4
+## 🆕 What's New in RC5
+
+### Major Enhancements
+- **🔧 Configurable Browser Options** - Complete control over browser behavior and debugging capabilities
+- **🤖 Intelligent DRM Compatibility** - Automatic DRM detection with smart browser configuration
+- **🔍 Enhanced Debugging Support** - DevTools integration, remote debugging, and comprehensive logging
+- **⚡ DRM Playback Resolution** - Fixed critical Widevine headless mode compatibility issues
+- **📚 Comprehensive Browser Documentation** - Detailed guide with 50+ browser arguments categorized by use case
+
+### New Capabilities
+- **Headless Mode Control** - Toggle browser visibility with `browserOptions.headless: true/false`
+- **Custom Browser Arguments** - Full support for Chromium arguments across debugging, performance, media, security, and DRM categories
+- **Automatic DRM Detection** - Smart detection of DRM configuration with automatic headless override and DRM-optimized arguments
+- **Hardware Security Handling** - Proper Widevine L1 hardware-backed security requirements management
+- **User Notifications** - Clear warnings when DRM configuration overrides browser settings
+
+### Critical Fixes
+- **DRM Playback Issues** - Resolved Widevine DRM compatibility problems with headless browsers
+- **Hardware Security Requirements** - Fixed EME (Encrypted Media Extensions) limitations in headless mode
+- **Browser Launch Stability** - Enhanced browser argument handling with conflict resolution
+
+### Developer Experience Improvements
+- **Enhanced Configuration Schema** - New `browserOptions` validation with TypeScript support
+- **Comprehensive Troubleshooting** - Detailed DRM debugging procedures with step-by-step resolution
+- **Smart Configuration Merging** - User arguments intelligently merged with stability defaults
+- **Backward Compatibility** - Existing configurations continue to work seamlessly
+
+## 🆕 What's New in RC4 (Previous Release)
 
 ### Major Enhancements
 - **🔐 Authenticated Session Simulation** - Complete localStorage pre-population for realistic user testing
@@ -251,4 +307,4 @@ Special thanks to all contributors and the open-source community for making this
 
 ---
 
-**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.4
+**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.5

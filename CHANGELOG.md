@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.5] - 2025-02-08
+
+### Added
+- **Configurable Browser Options** - Full control over browser behavior and debugging capabilities
+  - `browserOptions.headless` - Control headless mode (true/false)
+  - `browserOptions.args` - Custom browser arguments for debugging, performance, and DRM optimization
+  - Comprehensive browser argument documentation with categorized examples
+- **Automatic DRM Compatibility** - Intelligent DRM detection and browser configuration
+  - Automatic headless mode disabling when DRM configuration is detected
+  - Automatic DRM-specific browser arguments injection (`--enable-features=WidevineL1`, etc.)
+  - User warnings when DRM overrides browser configuration
+- **Enhanced DRM Support** - Improved Widevine, PlayReady, and FairPlay compatibility
+  - Hardware security requirement handling for Widevine L1
+  - Display context requirements for DRM content protection
+  - EME (Encrypted Media Extensions) optimization
+- **Comprehensive Browser Arguments** - Support for 50+ browser arguments across categories:
+  - Debugging & Development (DevTools, logging, remote debugging)
+  - Performance & Memory (heap size, cache management, CPU optimization)
+  - Media & Streaming (autoplay, hardware acceleration, codec support)
+  - Network & Security (SSL, CORS, proxy configuration)
+  - Display & Window (size, position, scaling, kiosk mode)
+  - DRM & Content Protection (Widevine L1, HDCP policy, content settings)
+
+### Changed
+- **TestRunner Browser Configuration** - Enhanced browser pool configuration with DRM detection
+  - Browser options now merge user-specified args with stability defaults
+  - DRM configuration automatically triggers non-headless mode and DRM-optimized arguments
+  - Improved browser argument handling with conflict resolution
+- **Configuration Schema** - Extended configuration validation
+  - Added `browserOptions` schema with `headless` boolean and `args` array validation
+  - Updated TypeScript interfaces with new `BrowserOptions` type
+  - Enhanced configuration examples with browser options
+
+### Fixed
+- **DRM Playback Issues** - Resolved Widevine DRM compatibility problems
+  - Fixed headless mode preventing DRM license acquisition
+  - Resolved hardware security requirement conflicts
+  - Fixed EME (Encrypted Media Extensions) limitations in headless browsers
+- **Browser Launch Stability** - Improved browser instance reliability
+  - Enhanced default browser arguments for stability and performance
+  - Better handling of browser argument conflicts and overrides
+
+### Documentation
+- **Enhanced Configuration Guide** - Comprehensive browser options documentation
+  - Detailed browser argument categories with practical examples
+  - DRM-specific configuration guidance with automatic behavior explanation
+  - Performance optimization recommendations for different use cases
+- **Expanded Troubleshooting Guide** - New DRM troubleshooting section
+  - Detailed DRM + headless mode issue resolution
+  - Hardware security requirement explanations
+  - Step-by-step DRM debugging procedures with remote debugging setup
+- **Updated README** - Clarified DRM and headless mode behavior
+
+### Technical Details
+- **Browser Pool Enhancement** - Improved browser instance management
+  - Dynamic browser argument merging with user preferences
+  - Automatic DRM detection and configuration override
+  - Enhanced logging and user feedback for configuration changes
+- **Configuration Management** - Extended configuration system
+  - New `browserOptions` configuration section with validation
+  - Backward compatibility with existing configurations
+  - Environment variable support for browser options (future enhancement)
+
+## [1.0.0-rc.4] - 2025-02-07
+
 ### Added
 - Initial release of Lightweight Browser Load Tester
 - Real browser testing using Playwright with Chromium
