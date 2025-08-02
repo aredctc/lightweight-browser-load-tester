@@ -86,18 +86,17 @@ jobs:
           npm install
         fi
     
-    - name: Extract version from GitHub tag
+    - name: Extract version from package.json
       id: version
       run: |
-        # Remove 'v' prefix from tag (e.g., v1.0.0-rc.1 -> 1.0.0-rc.1)
-        VERSION=${GITHUB_REF#refs/tags/v}
+        # Get version from package.json
+        VERSION=$(node -p "require('./package.json').version")
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Publishing version: $VERSION"
     
-    - name: Update package.json version
+    - name: Verify package version
       run: |
-        npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-        echo "Updated package.json to version ${{ steps.version.outputs.version }}"
+        echo "Package version is already set to: ${{ steps.version.outputs.version }}"
     
     - name: Build project
       run: npm run build
