@@ -686,7 +686,7 @@ The tool is optimized for minimal resource consumption:
 - **Browser Instance Pooling**: Reuse browser instances to reduce startup overhead
 - **Memory Management**: Automatic cleanup between test runs
 - **CPU Throttling**: Configurable CPU usage limits per instance
-- **Headless Mode**: Runs browsers without GUI by default
+- **Headless Mode**: Runs browsers without GUI by default (automatically disabled for DRM content)
 
 ### Configuration Tips
 

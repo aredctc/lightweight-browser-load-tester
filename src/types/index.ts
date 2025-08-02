@@ -68,6 +68,14 @@ export interface OpenTelemetryConfiguration {
 }
 
 /**
+ * Browser options configuration
+ */
+export interface BrowserOptions {
+  headless?: boolean;
+  args?: string[];
+}
+
+/**
  * Main test configuration interface
  */
 export interface TestConfiguration {
@@ -82,6 +90,7 @@ export interface TestConfiguration {
   requestParameters: ParameterTemplate[];
   resourceLimits: ResourceLimits;
   localStorage?: LocalStorageEntry[]; // Pre-populate localStorage for authenticated sessions
+  browserOptions?: BrowserOptions;
   prometheus?: PrometheusConfiguration;
   opentelemetry?: OpenTelemetryConfiguration;
 }

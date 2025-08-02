@@ -358,6 +358,47 @@ rampUpTime: 300              # Slower ramp-up (5 minutes)
 
 ## DRM Testing Issues
 
+### DRM Content Not Playing (Headless Mode Issue)
+
+**Problem:** DRM-protected content fails to play, shows black screen, or license acquisition fails.
+
+**Symptoms:**
+- Video player shows black screen
+- License request errors in network logs
+- EME (Encrypted Media Extensions) errors
+- Content plays in regular browser but not in load tester
+
+**Root Cause:** Widevine DRM requires hardware security features and display context not available in headless browsers.
+
+**Solution:**
+```yaml
+# ✅ DRM requires non-headless mode
+browserOptions:
+  headless: false  # Essential for DRM content
+  args:
+    - "--enable-features=WidevineL1"
+    - "--autoplay-policy=no-user-gesture-required"
+    - "--disable-features=EncryptedMediaHdcpPolicyCheck"
+```
+
+**Note:** The load tester automatically disables headless mode when `drmConfig` is present.
+
+**Debugging DRM Issues:**
+```yaml
+# Enable verbose logging for DRM debugging
+browserOptions:
+  headless: false
+  args:
+    - "--enable-logging"
+    - "--log-level=0"
+    - "--remote-debugging-port=9222"
+```
+
+Then connect to `http://localhost:9222` to inspect:
+- Console errors
+- Network tab for license requests  
+- Media tab for EME events
+
 ### DRM License Acquisition Failures
 
 **Problem:** DRM license requests fail.

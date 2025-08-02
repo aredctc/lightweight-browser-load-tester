@@ -54,6 +54,113 @@ resourceLimits:
   maxConcurrentInstances: 20    # Maximum number of browser instances
 ```
 
+### Browser Options (Optional)
+
+Configure browser behavior and debugging options:
+
+```yaml
+browserOptions:
+  headless: true                # Run browsers in headless mode (default: true)
+  args:                        # Additional browser arguments (default: [])
+    - "--auto-open-devtools-for-tabs"
+    - "--start-maximized"
+    - "--enable-logging"
+```
+
+#### Common Browser Arguments
+
+**Debugging & Development:**
+```yaml
+browserOptions:
+  headless: false
+  args:
+    - "--auto-open-devtools-for-tabs"     # Opens DevTools automatically
+    - "--start-maximized"                 # Starts browser maximized
+    - "--start-fullscreen"                # Starts in fullscreen
+    - "--enable-logging"                  # Enables logging
+    - "--log-level=0"                     # Verbose logging (0=INFO, 1=WARNING, 2=ERROR)
+    - "--remote-debugging-port=9222"      # Enables remote debugging
+```
+
+**Performance & Memory:**
+```yaml
+browserOptions:
+  args:
+    - "--max-old-space-size=4096"         # Sets V8 heap size (MB)
+    - "--memory-pressure-off"             # Disables memory pressure signals
+    - "--disk-cache-size=0"               # Disables disk cache
+    - "--media-cache-size=0"              # Disables media cache
+    - "--aggressive-cache-discard"        # Aggressive cache management
+```
+
+**Media & Streaming:**
+```yaml
+browserOptions:
+  args:
+    - "--autoplay-policy=no-user-gesture-required"  # Allows autoplay
+    - "--disable-background-media-suspend"          # Prevents media suspension
+    - "--enable-features=MediaSession"              # Enables media session API
+    - "--enable-gpu-rasterization"                  # Enables GPU rasterization
+    - "--ignore-gpu-blacklist"                      # Ignores GPU blacklist
+```
+
+**Network & Security:**
+```yaml
+browserOptions:
+  args:
+    - "--ignore-ssl-errors"               # Ignores SSL errors
+    - "--ignore-certificate-errors"      # Ignores certificate errors
+    - "--allow-running-insecure-content" # Allows mixed content
+    - "--disable-site-isolation-trials"  # Disables site isolation
+```
+
+**Window & Display:**
+```yaml
+browserOptions:
+  args:
+    - "--window-size=1920,1080"          # Sets window size
+    - "--window-position=0,0"            # Sets window position
+    - "--force-device-scale-factor=1"    # Forces device scale factor
+    - "--kiosk"                          # Kiosk mode (fullscreen, no UI)
+```
+
+**DRM & Content Protection:**
+```yaml
+browserOptions:
+  headless: false  # Required for DRM content (automatically set when drmConfig is present)
+  args:
+    - "--enable-features=WidevineL1"      # Enables Widevine L1
+    - "--disable-features=EncryptedMediaHdcpPolicyCheck" # Disables HDCP check
+    - "--allow-external-pages"           # Allows external pages for DRM
+    - "--disable-features=BlockInsecurePrivateNetworkRequests" # Allows DRM requests
+```
+
+**⚠️ Important DRM Notes:**
+- **Headless Mode**: DRM content (Widevine, PlayReady, FairPlay) requires `headless: false` due to hardware security requirements
+- **Automatic Detection**: When `drmConfig` is present, the load tester automatically disables headless mode and adds DRM-specific arguments
+- **Hardware Requirements**: Widevine L1 requires hardware-backed security features not available in headless environments
+- **Display Context**: DRM systems often require an actual display context for content protection
+
+#### Default Arguments (Automatically Included)
+
+The load tester automatically includes these stability and performance arguments:
+
+- `--no-sandbox` - Disables sandbox (required for containers)
+- `--disable-setuid-sandbox` - Disables setuid sandbox
+- `--disable-dev-shm-usage` - Uses /tmp instead of /dev/shm
+- `--disable-web-security` - Disables web security (for testing)
+- `--disable-gpu` - Disables GPU acceleration
+- `--disable-extensions` - Disables extensions
+- `--disable-plugins` - Disables plugins
+- `--disable-background-timer-throttling` - Prevents timer throttling
+- `--disable-backgrounding-occluded-windows` - Prevents background throttling
+- `--disable-renderer-backgrounding` - Keeps renderers active
+- `--enable-automation` - Enables automation mode
+- `--no-first-run` - Skips first run experience
+- `--no-default-browser-check` - Skips default browser check
+
+Your custom arguments are added to these defaults, not replacing them.
+
 ## DRM Testing Configuration
 
 ### Widevine Configuration

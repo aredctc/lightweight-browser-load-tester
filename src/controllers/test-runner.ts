@@ -104,6 +104,13 @@ export class TestRunner extends EventEmitter {
     super();
     this.testId = `test-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     this.config = config;
+
+    // Warn user if DRM is configured and headless mode is being overridden
+    if (config.drmConfig && (config.browserOptions?.headless !== false)) {
+      console.warn('🔐 DRM detected: Automatically disabling headless mode for Widevine compatibility');
+      console.warn('   Widevine DRM requires a display context and hardware security features');
+      console.warn('   To explicitly control this behavior, set browserOptions.headless in your config');
+    }
     
     // Create browser pool configuration
     const poolConfig: BrowserPoolConfig = {
@@ -112,8 +119,10 @@ export class TestRunner extends EventEmitter {
       resourceLimits: config.resourceLimits,
       localStorage: config.localStorage,
       browserOptions: {
-        headless: true,
+        // Automatically disable headless mode when DRM is configured
+        headless: config.drmConfig ? false : (config.browserOptions?.headless ?? true),
         args: [
+          // Default stability and performance args
           '--disable-web-security',
           '--disable-features=VizDisplayCompositor',
           '--disable-background-networking',
@@ -129,7 +138,15 @@ export class TestRunner extends EventEmitter {
           '--safebrowsing-disable-auto-update',
           '--enable-automation',
           '--password-store=basic',
-          '--use-mock-keychain'
+          '--use-mock-keychain',
+          // Add DRM-specific args when DRM is configured
+          ...(config.drmConfig ? [
+            '--enable-features=WidevineL1',
+            '--autoplay-policy=no-user-gesture-required',
+            '--disable-features=EncryptedMediaHdcpPolicyCheck'
+          ] : []),
+          // Add user-specified args
+          ...(config.browserOptions?.args || [])
         ]
       }
     };

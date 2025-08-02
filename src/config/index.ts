@@ -92,6 +92,11 @@ const opentelemetryConfigSchema = Joi.object({
   exportTimeout: Joi.number().integer().min(1000).default(30000)
 });
 
+const browserOptionsSchema = Joi.object({
+  headless: Joi.boolean().optional().default(true),
+  args: Joi.array().items(Joi.string()).optional().default([])
+});
+
 const testConfigurationSchema = Joi.object({
   concurrentUsers: Joi.number().integer().min(1).required(),
   testDuration: Joi.number().integer().min(1).required(),
@@ -104,6 +109,7 @@ const testConfigurationSchema = Joi.object({
   requestParameters: Joi.array().items(parameterTemplateSchema).default([]),
   resourceLimits: resourceLimitsSchema.required(),
   localStorage: Joi.array().items(localStorageEntrySchema).optional().default([]),
+  browserOptions: browserOptionsSchema.optional(),
   prometheus: prometheusConfigSchema.optional(),
   opentelemetry: opentelemetryConfigSchema.optional()
 });
@@ -121,6 +127,10 @@ const DEFAULT_CONFIG: TestConfiguration = {
   blockedUrls: [],
   requestParameters: [],
   localStorage: [],
+  browserOptions: {
+    headless: true,
+    args: []
+  },
   resourceLimits: {
     maxMemoryPerInstance: 512,
     maxCpuPercentage: 80,
