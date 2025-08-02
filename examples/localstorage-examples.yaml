@@ -1,0 +1,190 @@
+# localStorage Configuration Examples
+# This file demonstrates various localStorage use cases for different scenarios
+
+# Basic configuration
+concurrentUsers: 3
+testDuration: 120
+rampUpTime: 15
+streamingUrl: "https://example.com/app"
+
+# Example 1: E-commerce Application
+# Simulating users with shopping carts and preferences
+localStorage:
+  - domain: "shop.example.com"
+    data:
+      # User authentication
+      user_token: "shop_token_abc123"
+      user_id: "customer_456"
+      
+      # Shopping cart state
+      cart_items: '[{"id":"prod_123","name":"Wireless Headphones","price":99.99,"quantity":1},{"id":"prod_456","name":"Phone Case","price":19.99,"quantity":2}]'
+      cart_total: "139.97"
+      cart_currency: "USD"
+      
+      # User preferences
+      shipping_address: '{"street":"123 Main St","city":"San Francisco","state":"CA","zip":"94105"}'
+      payment_method: "card_ending_1234"
+      
+      # Browsing history
+      recently_viewed: '["prod_789","prod_101","prod_202"]'
+      search_history: '["wireless headphones","phone accessories","bluetooth speakers"]'
+      
+      # UI preferences
+      theme: "light"
+      language: "en-US"
+      currency_display: "USD"
+
+---
+# Example 2: SaaS Dashboard Application
+# Simulating authenticated business users
+concurrentUsers: 5
+testDuration: 180
+rampUpTime: 20
+streamingUrl: "https://dashboard.saas-example.com"
+
+localStorage:
+  - domain: "dashboard.saas-example.com"
+    data:
+      # Authentication
+      access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example_payload.signature"
+      refresh_token: "refresh_abc123def456"
+      token_expires: "1704758400000"
+      
+      # User and workspace info
+      user_id: "user_789"
+      workspace_id: "ws_123"
+      organization_id: "org_456"
+      user_role: "admin"
+      
+      # Dashboard preferences
+      dashboard_layout: '{"widgets":[{"id":"sales","position":{"x":0,"y":0}},{"id":"analytics","position":{"x":1,"y":0}}]}'
+      selected_date_range: '{"start":"2024-01-01","end":"2024-01-31"}'
+      
+      # Feature flags
+      feature_flags: '{"new_analytics":true,"beta_reports":false,"advanced_filters":true}'
+      
+      # Application state
+      last_viewed_report: "monthly_sales_2024"
+      sidebar_collapsed: "false"
+      notifications_enabled: "true"
+
+---
+# Example 3: Multi-Domain Application
+# Simulating complex applications spanning multiple domains
+concurrentUsers: 4
+testDuration: 240
+rampUpTime: 30
+streamingUrl: "https://main-app.example.com/dashboard"
+
+localStorage:
+  # Main application domain
+  - domain: "main-app.example.com"
+    data:
+      # Primary authentication
+      session_token: "main_session_xyz789"
+      user_profile: '{"id":"user_999","name":"Jane Smith","email":"jane@example.com","avatar":"https://cdn.example.com/avatars/user_999.jpg"}'
+      
+      # Application preferences
+      ui_theme: "dark"
+      language: "en"
+      timezone: "America/New_York"
+      
+      # Recent activity
+      last_login: "1704672000000"
+      active_projects: '["proj_1","proj_2","proj_3"]'
+
+  # API subdomain
+  - domain: "api.main-app.example.com"
+    data:
+      # API-specific tokens
+      api_key: "api_key_123456789"
+      rate_limit_remaining: "950"
+      last_api_call: "1704672000000"
+      
+      # API preferences
+      api_version: "v2"
+      response_format: "json"
+
+  # CDN subdomain
+  - domain: "cdn.main-app.example.com"
+    data:
+      # Asset caching
+      cache_version: "v1.2.3"
+      preferred_region: "us-east-1"
+      
+      # Performance data
+      connection_speed: "fast"
+      last_speed_test: '{"timestamp":1704672000000,"download":45.2,"upload":12.1}'
+
+---
+# Example 4: Gaming Platform
+# Simulating gaming sessions with player data
+concurrentUsers: 8
+testDuration: 300
+rampUpTime: 45
+streamingUrl: "https://gaming.example.com/play/game123"
+
+localStorage:
+  - domain: "gaming.example.com"
+    data:
+      # Player authentication
+      player_token: "player_token_game123"
+      player_id: "player_555"
+      
+      # Game state
+      current_level: "15"
+      player_score: "98750"
+      achievements: '["first_win","level_10","speed_demon","treasure_hunter"]'
+      
+      # Game preferences
+      graphics_quality: "high"
+      sound_enabled: "true"
+      music_volume: "0.7"
+      sfx_volume: "0.8"
+      
+      # Social features
+      friends_list: '["player_111","player_222","player_333"]'
+      guild_id: "guild_awesome"
+      
+      # Game progress
+      unlocked_characters: '["warrior","mage","archer","rogue"]'
+      inventory: '{"weapons":["sword_of_power","magic_staff"],"armor":["steel_helmet","leather_boots"],"consumables":{"health_potion":5,"mana_potion":3}}'
+
+---
+# Example 5: Educational Platform
+# Simulating student learning sessions
+concurrentUsers: 6
+testDuration: 200
+rampUpTime: 25
+streamingUrl: "https://learn.example.com/course/javascript-101"
+
+localStorage:
+  - domain: "learn.example.com"
+    data:
+      # Student authentication
+      student_token: "student_token_edu456"
+      student_id: "student_789"
+      
+      # Course progress
+      enrolled_courses: '["javascript-101","html-css-basics","react-fundamentals"]'
+      current_course: "javascript-101"
+      course_progress: '{"javascript-101":{"completed_lessons":12,"total_lessons":25,"quiz_scores":[85,92,78,88]}}'
+      
+      # Learning preferences
+      playback_speed: "1.25"
+      captions_enabled: "true"
+      note_taking_enabled: "true"
+      
+      # Study data
+      study_streak: "7"
+      total_study_time: "14400"  # seconds
+      favorite_topics: '["functions","arrays","objects"]'
+      
+      # Bookmarks and notes
+      bookmarked_lessons: '["lesson_5","lesson_12","lesson_18"]'
+      notes: '{"lesson_5":"Remember: functions are first-class objects","lesson_12":"Array methods are powerful for data manipulation"}'
+
+resourceLimits:
+  maxMemoryPerInstance: 512
+  maxCpuPercentage: 80
+  maxConcurrentInstances: 10

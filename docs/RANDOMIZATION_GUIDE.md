@@ -224,25 +224,25 @@ requestParameters:
   # Authentication
   - target: header
     name: "Authorization"
-    valueTemplate: "Bearer {{randomFromFile:./data/auth-tokens.txt}}"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
     scope: per-session
   
   # Device identification
   - target: header
     name: "X-Device-ID"
-    valueTemplate: "{{randomFromFile:./data/device-ids.txt}}"
+    valueTemplate: "{{randomFromFile:./examples/data/device-ids.txt}}"
     scope: per-session
   
   # User agent rotation
   - target: header
     name: "User-Agent"
-    valueTemplate: "{{randomFromFile:./data/user-agents.txt}}"
+    valueTemplate: "{{randomFromFile:./examples/data/user-agents.txt}}"
     scope: per-session
   
   # Session types
   - target: header
     name: "X-Session-Type"
-    valueTemplate: "{{randomFromFile:./data/session-types.txt}}"
+    valueTemplate: "{{randomFromFile:./examples/data/session-types.txt}}"
     scope: per-session
 ```
 
@@ -265,7 +265,7 @@ requestParameters:
   # Complex header with all methods
   - target: header
     name: "X-Complex-Header"
-    valueTemplate: "{{randomFrom:environments}}_{{random:uuid}}_{{randomFromFile:./data/session-types.txt}}"
+    valueTemplate: "{{randomFrom:environments}}_{{random:uuid}}_{{randomFromFile:./examples/data/session-types.txt}}"
     scope: per-session
   
   # JSON body with mixed randomization
@@ -276,7 +276,7 @@ requestParameters:
         "sessionId": "{{random:uuid}}",
         "deviceType": "{{randomFrom:deviceTypes}}",
         "timestamp": {{random:timestamp}},
-        "authLevel": "{{randomFromFile:./data/auth-levels.txt}}",
+        "authLevel": "{{randomFromFile:./examples/data/auth-levels.txt}}",
         "userId": {{random:1-10000}}
       }
     scope: per-session
@@ -291,7 +291,7 @@ requestParameters:
   # Different auth methods for different user types
   - target: header
     name: "Authorization"
-    valueTemplate: "Bearer {{randomFromFile:./data/premium-tokens.txt}}"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/premium-tokens.txt}}"
     scope: per-session
     # Note: Conditional logic would be implemented in the application layer
   
@@ -327,7 +327,7 @@ requestParameters:
       {
         "id": "{{random:uuid}}",
         "type": "{{randomFrom:clientTypes}}",
-        "version": "{{randomFromFile:./data/client-versions.txt}}"
+        "version": "{{randomFromFile:./examples/data/client-versions.txt}}"
       }
     scope: per-session
 ```
@@ -508,13 +508,13 @@ requestParameters:
   # File selection
   - target: header
     name: "Authorization"
-    valueTemplate: "Bearer {{randomFromFile:./data/auth-tokens.txt}}"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
     scope: per-session
   
   # Combined methods
   - target: header
     name: "X-Session-Info"
-    valueTemplate: "{{randomFrom:environments}}_{{random:alphanumeric}}_{{randomFromFile:./data/session-types.txt}}"
+    valueTemplate: "{{randomFrom:environments}}_{{random:alphanumeric}}_{{randomFromFile:./examples/data/session-types.txt}}"
     scope: per-session
 
 resourceLimits:

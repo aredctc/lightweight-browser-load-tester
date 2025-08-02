@@ -60,23 +60,23 @@ requestParameters:
   # Option 3: Random selection from external files
   - target: header
     name: "Authorization"
-    valueTemplate: "Bearer {{randomFromFile:./test-configs/data/auth-tokens.txt}}"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
     scope: per-session
   
   - target: header
     name: "X-Device-ID"
-    valueTemplate: "{{randomFromFile:./test-configs/data/device-ids.txt}}"
+    valueTemplate: "{{randomFromFile:./examples/data/device-ids.txt}}"
     scope: per-session
   
   - target: header
     name: "X-Session-Type"
-    valueTemplate: "{{randomFromFile:./test-configs/data/session-types.txt}}"
+    valueTemplate: "{{randomFromFile:./examples/data/session-types.txt}}"
     scope: per-session
   
   # Combined examples using multiple randomization methods
   - target: header
     name: "X-Complex-Header"
-    valueTemplate: "{{randomFrom:environments}}_{{random:uuid}}_{{randomFromFile:./test-configs/data/session-types.txt}}"
+    valueTemplate: "{{randomFrom:environments}}_{{random:uuid}}_{{randomFromFile:./examples/data/session-types.txt}}"
     scope: per-session
   
   - target: body

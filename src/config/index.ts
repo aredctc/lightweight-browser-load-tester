@@ -53,6 +53,11 @@ const parameterTemplateSchema = Joi.object({
   scope: Joi.string().valid('global', 'per-session').required()
 });
 
+const localStorageEntrySchema = Joi.object({
+  domain: Joi.string().required(),
+  data: Joi.object().pattern(Joi.string(), Joi.string()).required()
+});
+
 const resourceLimitsSchema = Joi.object({
   maxMemoryPerInstance: Joi.number().integer().min(128).required(),
   maxCpuPercentage: Joi.number().min(1).max(100).required(),
@@ -98,6 +103,7 @@ const testConfigurationSchema = Joi.object({
   drmConfig: drmConfigSchema.optional(),
   requestParameters: Joi.array().items(parameterTemplateSchema).default([]),
   resourceLimits: resourceLimitsSchema.required(),
+  localStorage: Joi.array().items(localStorageEntrySchema).optional().default([]),
   prometheus: prometheusConfigSchema.optional(),
   opentelemetry: opentelemetryConfigSchema.optional()
 });
@@ -114,6 +120,7 @@ const DEFAULT_CONFIG: TestConfiguration = {
   allowedUrls: [],
   blockedUrls: [],
   requestParameters: [],
+  localStorage: [],
   resourceLimits: {
     maxMemoryPerInstance: 512,
     maxCpuPercentage: 80,
@@ -513,6 +520,23 @@ export class ConfigurationManager {
           name: 'Authorization',
           valueTemplate: 'Bearer {{token}}',
           scope: 'per-session'
+        }
+      ],
+      localStorage: [
+        {
+          domain: 'example.com',
+          data: {
+            'auth_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            'user_id': '12345',
+            'session_id': 'sess_abc123'
+          }
+        },
+        {
+          domain: 'cdn.example.com',
+          data: {
+            'preferences': '{"theme":"dark","language":"en"}',
+            'cache_version': '1.2.3'
+          }
         }
       ],
       resourceLimits: {

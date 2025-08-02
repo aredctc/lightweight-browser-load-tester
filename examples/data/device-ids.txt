@@ -1,0 +1,21 @@
+# Device identifiers for different platforms
+android-phone-samsung-s24-001
+android-phone-pixel-8-002
+android-tablet-samsung-tab-003
+ios-phone-iphone-15-004
+ios-phone-iphone-14-005
+ios-tablet-ipad-pro-006
+web-chrome-desktop-win-007
+web-firefox-desktop-mac-008
+web-safari-desktop-mac-009
+smart-tv-samsung-tizen-010
+smart-tv-lg-webos-011
+roku-ultra-4k-012
+roku-streaming-stick-013
+apple-tv-4k-gen3-014
+fire-tv-stick-4k-015
+chromecast-ultra-016
+xbox-series-x-017
+playstation-5-018
+nvidia-shield-tv-019
+android-tv-sony-020
