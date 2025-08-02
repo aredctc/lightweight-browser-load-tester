@@ -1,7 +1,0 @@
-# Different session types for testing
-premium-subscriber
-basic-subscriber
-trial-user
-guest-user
-admin-user
-developer-user

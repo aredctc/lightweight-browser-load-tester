@@ -275,6 +275,11 @@ export class BrowserPool extends EventEmitter {
       });
       const page = await context.newPage();
 
+      // Initialize localStorage if configured
+      if (this.config.localStorage && this.config.localStorage.length > 0) {
+        await this.initializeLocalStorage(page);
+      }
+
       const instance: ManagedBrowserInstance = {
         id: instanceId,
         browser,
@@ -695,5 +700,76 @@ export class BrowserPool extends EventEmitter {
     }
 
     return actualCleanupCount;
+  }
+
+  /**
+   * Initialize localStorage for all configured domains
+   */
+  private async initializeLocalStorage(page: any): Promise<void> {
+    if (!this.config.localStorage || this.config.localStorage.length === 0) {
+      return;
+    }
+
+    // Import randomization utility
+    const { RandomizationUtil } = await import('../utils/randomization');
+    
+    // Create randomization context with browser instance specific data
+    const instanceId = `browser-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const randomizationUtil = new RandomizationUtil({
+      instanceId,
+      timestamp: Date.now().toString(),
+      sessionId: `sess-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      // Add any arrays that might be used in randomFrom functions
+      userIds: ['user_001', 'user_002', 'user_003', 'user_004', 'user_005'],
+      deviceTypes: ['desktop', 'mobile', 'tablet'],
+      themes: ['light', 'dark', 'auto'],
+      languages: ['en', 'es', 'fr', 'de', 'ja'],
+      currencies: ['USD', 'EUR', 'GBP', 'JPY', 'CAD'],
+      // Additional arrays for streaming/media applications
+      videoQualities: ['480p', '720p', '1080p', '4K'],
+      subscriptionTiers: ['free', 'basic', 'premium', 'enterprise'],
+      booleans: ['true', 'false'],
+      playbackSpeeds: ['0.5', '0.75', '1.0', '1.25', '1.5', '2.0']
+    });
+
+    for (const localStorageEntry of this.config.localStorage) {
+      try {
+        // Navigate to the domain to set localStorage
+        const domainUrl = localStorageEntry.domain.startsWith('http') 
+          ? localStorageEntry.domain 
+          : `https://${localStorageEntry.domain}`;
+        
+        await page.goto(domainUrl, { 
+          waitUntil: 'domcontentloaded',
+          timeout: 10000 
+        });
+
+        // Process localStorage data with randomization
+        const processedData = randomizationUtil.processLocalStorageData(localStorageEntry.data);
+
+        // Set localStorage items for this domain
+        await page.evaluate((data: Record<string, string>) => {
+          Object.entries(data).forEach(([key, value]) => {
+            (globalThis as any).localStorage.setItem(key, value);
+          });
+        }, processedData);
+
+        this.emit('localStorageInitialized', { 
+          domain: localStorageEntry.domain, 
+          itemCount: Object.keys(processedData).length,
+          processedData // Include processed data in event for debugging
+        });
+
+      } catch (error) {
+        this.emit('localStorageInitializationFailed', { 
+          domain: localStorageEntry.domain, 
+          error 
+        });
+        // Continue with other domains even if one fails
+      }
+    }
+
+    // Navigate to about:blank after setting up localStorage
+    await page.goto('about:blank');
   }
 }

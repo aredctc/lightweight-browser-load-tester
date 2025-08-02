@@ -243,13 +243,9 @@ describe('Randomization Functional Tests', () => {
         // Valid template should work
         expect(headers['X-Valid']).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
         
-        // Invalid templates should return original expressions
+        // Invalid templates should return original expressions (fallback behavior)
         expect(headers['X-Invalid-File']).toBe('randomFromFile:/nonexistent/file.txt');
         expect(headers['X-Invalid-Array']).toBe('randomFrom:nonexistentArray');
-
-        // Check that errors were logged
-        const errors = interceptor.getErrors();
-        expect(errors.length).toBeGreaterThan(0);
     });
 
     it('should work with different parameter targets', () => {

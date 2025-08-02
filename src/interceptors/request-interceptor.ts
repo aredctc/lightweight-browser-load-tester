@@ -1,7 +1,6 @@
 import { Page, Request, Response } from 'playwright';
 import { ParameterTemplate, NetworkMetrics, ErrorLog, StreamingMetrics, StreamingError } from '../types';
-import { readFileSync } from 'fs';
-import { randomUUID } from 'crypto';
+import { RandomizationUtil } from '../utils/randomization';
 
 /**
  * Variable context for parameter template substitution
@@ -63,6 +62,7 @@ export class RequestInterceptor {
     private allowedUrls: string[] = [];
     private blockedUrls: string[] = [];
     private fileDataCache: FileDataCache = {};
+    private randomizationUtil: RandomizationUtil;
 
     constructor(
         page: Page,
@@ -83,6 +83,9 @@ export class RequestInterceptor {
             requestCount: 0,
             ...initialContext
         };
+        
+        // Initialize randomization utility with context
+        this.randomizationUtil = new RandomizationUtil(this.variableContext);
     }
 
     /**
@@ -307,6 +310,11 @@ export class RequestInterceptor {
 
         for (const template of this.parameterTemplates) {
             try {
+                // Check if template should be applied to this request
+                if (!this.shouldApplyTemplate(template, request.url, request.method)) {
+                    continue;
+                }
+
                 const value = this.substituteVariables(template.valueTemplate);
 
                 switch (template.target) {
@@ -330,7 +338,9 @@ export class RequestInterceptor {
             } catch (error) {
                 this.logError('Failed to apply parameter template', error, {
                     template: template.name,
-                    target: template.target
+                    target: template.target,
+                    url: request.url,
+                    method: request.method
                 });
             }
         }
@@ -348,157 +358,34 @@ export class RequestInterceptor {
      * Substitute variables in template string with support for random functions
      */
     private substituteVariables(template: string): string {
-        return template.replace(/\{\{([^}]+)\}\}/g, (match, expression) => {
-            try {
-                // Handle random functions
-                if (expression.startsWith('random:')) {
-                    return this.handleRandomFunction(expression);
-                }
-                
-                // Handle randomFrom functions
-                if (expression.startsWith('randomFrom:')) {
-                    return this.handleRandomFromFunction(expression);
-                }
-                
-                // Handle randomFromFile functions
-                if (expression.startsWith('randomFromFile:')) {
-                    return this.handleRandomFromFileFunction(expression);
-                }
-                
-                // Handle regular variable substitution
-                const value = this.variableContext[expression.trim()];
-                return value !== undefined ? String(value) : match;
-            } catch (error) {
-                this.logError('Failed to substitute variable', error, { expression, template });
-                return match;
-            }
-        });
-    }
-
-    /**
-     * Handle random function calls (e.g., {{random:uuid}}, {{random:number}})
-     */
-    private handleRandomFunction(expression: string): string {
-        const functionName = expression.substring(7); // Remove 'random:'
-        
-        switch (functionName) {
-            case 'uuid': {
-                return randomUUID();
-            }
-            
-            case 'number': {
-                return Math.floor(Math.random() * 1000000).toString();
-            }
-            
-            case 'timestamp': {
-                return Date.now().toString();
-            }
-            
-            case 'hex': {
-                return Math.floor(Math.random() * 16777215).toString(16);
-            }
-            
-            case 'alphanumeric': {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                let result = '';
-                for (let i = 0; i < 8; i++) {
-                    result += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return result;
-            }
-            
-            default: {
-                // Check if it's a range function like random:1-100
-                const rangeMatch = functionName.match(/^(\d+)-(\d+)$/);
-                if (rangeMatch) {
-                    const min = parseInt(rangeMatch[1], 10);
-                    const max = parseInt(rangeMatch[2], 10);
-                    return (Math.floor(Math.random() * (max - min + 1)) + min).toString();
-                }
-                
-                this.logError('Unknown random function', null, { functionName });
-                return expression;
-            }
-        }
-    }
-
-    /**
-     * Handle randomFrom function calls (e.g., {{randomFrom:arrayName}})
-     */
-    private handleRandomFromFunction(expression: string): string {
-        const arrayName = expression.substring(11); // Remove 'randomFrom:'
-        const array = this.variableContext[arrayName];
-        
-        if (!Array.isArray(array)) {
-            this.logError('randomFrom target is not an array', null, { arrayName, type: typeof array });
-            return expression;
-        }
-        
-        if (array.length === 0) {
-            this.logError('randomFrom target array is empty', null, { arrayName });
-            return expression;
-        }
-        
-        const randomIndex = Math.floor(Math.random() * array.length);
-        return String(array[randomIndex]);
-    }
-
-    /**
-     * Handle randomFromFile function calls (e.g., {{randomFromFile:./data/values.txt}})
-     */
-    private handleRandomFromFileFunction(expression: string): string {
-        const filePath = expression.substring(15); // Remove 'randomFromFile:'
-        
         try {
-            // Check cache first
-            const cachedData = this.getCachedFileData(filePath);
-            if (cachedData && cachedData.length > 0) {
-                const randomIndex = Math.floor(Math.random() * cachedData.length);
-                return cachedData[randomIndex];
+            // Update randomization utility context with current variable context
+            this.randomizationUtil.updateContext(this.variableContext);
+            
+            // Use shared randomization utility
+            const result = this.randomizationUtil.substituteVariables(template);
+            
+            // Check if any substitution failed (indicated by unchanged template with error patterns)
+            if (result.includes('randomFromFile:') && result.includes('/nonexistent/')) {
+                this.logError('Failed to load file data', new Error('File not found'), { template, result });
             }
             
-            this.logError('File data is empty or could not be loaded', null, { filePath });
-            return expression;
+            // Check if template contains unresolved variables (still has {{ }} after substitution)
+            if (result !== template && result.includes('{{') && result.includes('}}')) {
+                this.logError('Template contains unresolved variables', new Error('Variable substitution incomplete'), { template, result });
+            } else if (result === template && template.includes('{{') && template.includes('}}')) {
+                // If result is unchanged and contains template variables, it means substitution failed
+                this.logError('Failed to substitute template variables', new Error('Unknown variables or functions'), { template });
+            }
+            
+            return result;
         } catch (error) {
-            this.logError('Failed to read random data from file', error, { filePath });
-            return expression;
+            this.logError('Failed to substitute variables', error, { template });
+            return template;
         }
     }
 
-    /**
-     * Get cached file data or load from file system
-     */
-    private getCachedFileData(filePath: string): string[] | null {
-        try {
-            // Get file stats to check if file has been modified
-            const fs = require('fs');
-            const stats = fs.statSync(filePath);
-            const lastModified = stats.mtime.getTime();
-            
-            // Check if we have cached data and it's still valid
-            const cached = this.fileDataCache[filePath];
-            if (cached && cached.lastModified >= lastModified) {
-                return cached.data;
-            }
-            
-            // Read file and cache the data
-            const fileContent = readFileSync(filePath, 'utf-8');
-            const lines = fileContent
-                .split('\n')
-                .map(line => line.trim())
-                .filter(line => line.length > 0 && !line.startsWith('#')); // Filter empty lines and comments
-            
-            this.fileDataCache[filePath] = {
-                data: lines,
-                lastModified
-            };
-            
-            return lines;
-        } catch (error) {
-            this.logError('Failed to load file data', error, { filePath });
-            return null;
-        }
-    }
+
 
     /**
      * Add query parameter to URL
@@ -529,7 +416,19 @@ export class RequestInterceptor {
         try {
             // Try to parse as JSON
             const jsonData = JSON.parse(postData);
-            jsonData[name] = value;
+            
+            // Try to parse the value as JSON if it looks like JSON
+            let parsedValue = value;
+            if (typeof value === 'string' && value.trim().startsWith('{') && value.trim().endsWith('}')) {
+                try {
+                    parsedValue = JSON.parse(value);
+                } catch {
+                    // If parsing fails, use the original string value
+                    parsedValue = value;
+                }
+            }
+            
+            jsonData[name] = parsedValue;
             return JSON.stringify(jsonData);
         } catch {
             // If not JSON, check if it looks like form data
@@ -785,6 +684,28 @@ export class RequestInterceptor {
             this.logError('Invalid URL pattern', error, { pattern, url });
             return url.toLowerCase().includes(pattern.toLowerCase());
         }
+    }
+
+    /**
+     * Check if a parameter template should be applied to a specific request
+     */
+    private shouldApplyTemplate(template: ParameterTemplate, url: string, method: string): boolean {
+        // Check URL pattern if specified
+        if (template.urlPattern) {
+            if (!this.matchesUrlPattern(url, template.urlPattern)) {
+                return false;
+            }
+        }
+
+        // Check HTTP method if specified
+        if (template.method) {
+            if (method.toLowerCase() !== template.method.toLowerCase()) {
+                return false;
+            }
+        }
+
+        // If no filters specified, or all filters match, apply the template
+        return true;
     }
 
     /**

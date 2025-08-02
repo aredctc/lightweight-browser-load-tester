@@ -200,6 +200,7 @@ interface TestConfiguration {
   streamingUrl: string;             // Target streaming URL
   drmConfig?: DRMConfiguration;     // Optional DRM configuration
   requestParameters: ParameterTemplate[]; // Request parameter injection
+  localStorage?: LocalStorageEntry[]; // Pre-populate localStorage for authenticated sessions
   resourceLimits: ResourceLimits;   // Resource usage limits
   prometheus?: PrometheusConfiguration; // Prometheus metrics export
   opentelemetry?: OpenTelemetryConfiguration; // OpenTelemetry export
@@ -221,7 +222,7 @@ interface DRMConfiguration {
 
 ### ParameterTemplate
 
-Template for parameterizing API requests.
+Template for selective request parameterization. **Always use URL patterns for precise targeting**.
 
 ```typescript
 interface ParameterTemplate {
@@ -229,14 +230,164 @@ interface ParameterTemplate {
   name: string;                     // Parameter name
   valueTemplate: string;            // Template with variable substitution
   scope: 'global' | 'per-session';  // Parameter scope
+  urlPattern?: string;              // URL pattern to match (RECOMMENDED)
+  method?: string;                  // HTTP method to match (optional)
 }
 ```
+
+**Selective Request Targeting (Primary Feature):**
+- `urlPattern`: URL pattern to match (wildcards, regex) - **Use this for precision**
+- `method`: HTTP method to match (GET, POST, PUT, DELETE, etc.)
+
+**Target Types:**
+- `header`: Inject into HTTP headers for specific URL patterns
+- `query`: Inject into URL query parameters for targeted requests
+- `body`: Inject into request body (JSON and form data) for specific endpoints
+
+**URL Pattern Examples:**
+- `"*/api/*"` - All API endpoints
+- `"*.m3u8"` - HLS manifest files
+- `"*/auth/*"` - Authentication endpoints
+- `"/^https:\\/\\/cdn[0-9]+\\.example\\.com/"` - CDN servers (regex)
 
 **Variable Substitution:**
 - `{{sessionId}}`: Unique session identifier
 - `{{timestamp}}`: Current timestamp
 - `{{random}}`: Random number
 - `{{token}}`: Authentication token
+- `{{requestCount}}`: Current request count
+- `{{random:uuid}}`: Generate UUID
+- `{{random:1-100}}`: Random number in range
+- `{{randomFrom:arrayName}}`: Random selection from array
+- `{{randomFromFile:path}}`: Random selection from file
+
+**Request Body Support:**
+- **JSON bodies**: Automatically parsed and modified
+- **Form data**: URL-encoded form data support
+- **Error handling**: Graceful fallback for unsupported formats
+
+### LocalStorageEntry
+
+Configuration for pre-populating browser localStorage to simulate authenticated sessions.
+
+```typescript
+interface LocalStorageEntry {
+  domain: string;                   // Domain for localStorage data
+  data: Record<string, string>;     // Key-value pairs to store
+}
+```
+
+**Domain Configuration:**
+- Can be a simple domain: `"example.com"`
+- Can include subdomain: `"app.example.com"`
+- Can include protocol: `"https://secure.example.com"`
+- Each domain is visited separately to set localStorage
+
+**Data Requirements:**
+- All keys and values must be strings (localStorage limitation)
+- Complex objects should be JSON-stringified
+- Empty data objects are allowed
+- Values support randomization functions for unique data per browser instance
+
+**Randomization Support:**
+localStorage values support the same randomization functions as request parameters:
+- `{{random:uuid}}` - Generate UUID
+- `{{random:number}}` - Random number 0-999999
+- `{{random:timestamp}}` - Current timestamp
+- `{{random:alphanumeric}}` - 8-character alphanumeric string
+- `{{random:1-100}}` - Random number in range
+- `{{randomFrom:arrayName}}` - Random selection from predefined array
+- `{{randomFromFile:./path/to/file.txt}}` - Random line from file
+
+**Common Use Cases:**
+```typescript
+// Static authentication tokens
+{
+  domain: "app.example.com",
+  data: {
+    "auth_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "def50200a1b2c3d4e5f6...",
+    "user_id": "user_12345"
+  }
+}
+
+// Randomized authentication for unique users
+{
+  domain: "app.example.com",
+  data: {
+    "auth_token": "Bearer {{random:uuid}}",
+    "refresh_token": "refresh_{{random:alphanumeric}}",
+    "user_id": "{{randomFrom:userIds}}",
+    "session_expires": "{{random:timestamp}}"
+  }
+}
+
+// User preferences with randomization
+{
+  domain: "streaming.example.com",
+  data: {
+    "user_preferences": '{"quality":"{{randomFrom:videoQualities}}","autoplay":{{randomFrom:booleans}}}',
+    "volume_level": "{{random:1-100}}",
+    "theme": "{{randomFrom:themes}}",
+    "device_id": "device_{{random:1-9999}}"
+  }
+}
+
+// Complex application state with randomization
+{
+  domain: "ecommerce.example.com",
+  data: {
+    "cart_items": '[{"id":"{{random:uuid}}","quantity":{{random:1-5}}}]',
+    "recently_viewed": '["prod_{{random:1-1000}}","prod_{{random:1-1000}}"]',
+    "user_location": '{"country":"US","currency":"{{randomFrom:currencies}}"}'
+  }
+}
+```
+
+**Predefined Arrays:**
+The system provides built-in arrays for common randomization needs:
+- `userIds` - ['user_001', 'user_002', 'user_003', 'user_004', 'user_005']
+- `deviceTypes` - ['desktop', 'mobile', 'tablet']
+- `themes` - ['light', 'dark', 'auto']
+- `languages` - ['en', 'es', 'fr', 'de', 'ja']
+- `currencies` - ['USD', 'EUR', 'GBP', 'JPY', 'CAD']
+- `videoQualities` - ['480p', '720p', '1080p', '4K']
+- `subscriptionTiers` - ['free', 'basic', 'premium', 'enterprise']
+- `booleans` - ['true', 'false']
+- `playbackSpeeds` - ['0.5', '0.75', '1.0', '1.25', '1.5', '2.0']
+
+**Multi-Domain Support:**
+```typescript
+localStorage: [
+  {
+    domain: "main-app.com",
+    data: {
+      "session_token": "main_token_123",
+      "user_id": "user_456"
+    }
+  },
+  {
+    domain: "api.main-app.com",
+    data: {
+      "api_version": "v3",
+      "rate_limit": "1000"
+    }
+  },
+  {
+    domain: "cdn.main-app.com",
+    data: {
+      "cache_version": "v2.1.0",
+      "preferences": '{"webp_support":true}'
+    }
+  }
+]
+```
+
+**Performance Considerations:**
+- localStorage initialization adds startup time to browser instances
+- Each domain requires a separate page navigation
+- Keep data payloads reasonable in size
+- Consider if all localStorage data is necessary for your test
 
 ### ResourceLimits
 

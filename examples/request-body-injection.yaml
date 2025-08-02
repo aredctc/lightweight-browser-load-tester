@@ -1,0 +1,191 @@
+# Example configuration demonstrating request body injection
+# This shows how to inject parameters into JSON and form data request bodies
+
+concurrentUsers: 8
+testDuration: 300
+rampUpTime: 30
+streamingUrl: "https://api.example.com/streaming"
+streamingOnly: true
+
+# Resource limits
+resourceLimits:
+  maxMemoryPerInstance: 512
+  maxCpuPercentage: 80
+  maxConcurrentInstances: 15
+
+# Request parameter injection with focus on body injection
+requestParameters:
+  # Header parameters for authentication and tracking
+  - target: header
+    name: "Authorization"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
+    scope: per-session
+  
+  - target: header
+    name: "X-Request-ID"
+    valueTemplate: "{{random:uuid}}"
+    scope: global
+  
+  - target: header
+    name: "Content-Type"
+    valueTemplate: "application/json"
+    scope: global
+  
+  # Query parameters
+  - target: query
+    name: "sessionId"
+    valueTemplate: "{{sessionId}}"
+    scope: per-session
+  
+  # Simple body parameters (will be added to JSON objects)
+  - target: body
+    name: "userId"
+    valueTemplate: "{{random:1-10000}}"
+    scope: per-session
+  
+  - target: body
+    name: "requestId"
+    valueTemplate: "req_{{requestCount}}"
+    scope: per-session
+  
+  - target: body
+    name: "timestamp"
+    valueTemplate: "{{timestamp}}"
+    scope: global
+  
+  # Complex JSON body parameter
+  - target: body
+    name: "clientInfo"
+    valueTemplate: |
+      {
+        "deviceId": "{{randomFromFile:./examples/data/device-ids.txt}}",
+        "deviceType": "{{randomFrom:deviceTypes}}",
+        "userAgent": "{{randomFrom:userAgents}}",
+        "sessionId": "{{sessionId}}",
+        "capabilities": {
+          "drm": ["widevine", "playready"],
+          "codecs": ["h264", "h265", "av1"],
+          "maxResolution": "4k",
+          "hdr": true
+        },
+        "timestamp": {{timestamp}},
+        "version": "{{randomFrom:clientVersions}}"
+      }
+    scope: per-session
+  
+  # User context information
+  - target: body
+    name: "userContext"
+    valueTemplate: |
+      {
+        "id": {{random:1-10000}},
+        "tier": "{{randomFrom:userTiers}}",
+        "region": "{{randomFrom:regions}}",
+        "preferences": {
+          "quality": "{{randomFrom:qualities}}",
+          "language": "{{randomFrom:languages}}",
+          "subtitles": {{randomFrom:booleans}}
+        }
+      }
+    scope: per-session
+  
+  # Streaming-specific metadata
+  - target: body
+    name: "streamingMetadata"
+    valueTemplate: |
+      {
+        "requestType": "{{randomFrom:requestTypes}}",
+        "bandwidth": {{random:1000-50000}},
+        "bufferSize": {{random:5-30}},
+        "adaptiveBitrate": true,
+        "drmEnabled": {{randomFrom:booleans}},
+        "analytics": {
+          "trackingId": "{{random:uuid}}",
+          "sessionStart": {{timestamp}},
+          "platform": "{{randomFrom:platforms}}"
+        }
+      }
+    scope: per-session
+
+# Variable context for randomFrom functions
+# Note: In actual implementation, this would be passed to the RequestInterceptor constructor
+variableContext:
+  deviceTypes:
+    - "mobile"
+    - "tablet"
+    - "desktop"
+    - "smart-tv"
+    - "streaming-device"
+    - "gaming-console"
+  
+  userAgents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+    - "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15"
+    - "Mozilla/5.0 (Android 14; Mobile; rv:121.0) Gecko/121.0 Firefox/121.0"
+  
+  clientVersions:
+    - "2.1.0"
+    - "2.2.0"
+    - "2.3.0"
+    - "3.0.0"
+    - "3.1.0"
+  
+  userTiers:
+    - "free"
+    - "basic"
+    - "premium"
+    - "enterprise"
+  
+  regions:
+    - "us-east"
+    - "us-west"
+    - "eu-central"
+    - "eu-west"
+    - "ap-southeast"
+    - "ap-northeast"
+  
+  qualities:
+    - "240p"
+    - "480p"
+    - "720p"
+    - "1080p"
+    - "4k"
+  
+  languages:
+    - "en"
+    - "es"
+    - "fr"
+    - "de"
+    - "ja"
+    - "zh"
+    - "pt"
+    - "ru"
+  
+  booleans:
+    - true
+    - false
+  
+  requestTypes:
+    - "manifest"
+    - "segment"
+    - "license"
+    - "analytics"
+    - "heartbeat"
+  
+  platforms:
+    - "web"
+    - "android"
+    - "ios"
+    - "roku"
+    - "apple-tv"
+    - "fire-tv"
+    - "chromecast"
+
+# Prometheus metrics export
+prometheus:
+  enabled: true
+  remoteWriteUrl: "http://localhost:9090/api/v1/write"
+  batchSize: 50
+  flushInterval: 30

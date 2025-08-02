@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation and examples
 - CLI interface with configuration validation
 - Programmatic API for Node.js applications
+- **Request body injection support** for JSON and form data requests
+- **Advanced request filtering** with streaming-only mode, allowed/blocked URL patterns
+- **Comprehensive request ingestion guide** with detailed examples and troubleshooting
+- **Enhanced parameter randomization** with built-in functions, array selection, and file-based data
+- **Intelligent request body modification** with automatic JSON/form data detection
+- **File-based data caching** for improved performance with external data sources
+- **Request body injection examples** demonstrating complex JSON structure injection
+- **Browser localStorage pre-population** for authenticated session simulation with multi-domain support
+- **localStorage randomization support** with same functions as request parameters for unique user data per browser instance
+- **Selective request targeting** with URL pattern and HTTP method filtering for parameter injection
+- **Precise parameter control** allowing different parameters for different endpoints and request types
 
 ### Features
 
@@ -30,6 +41,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Resource optimization**: Efficient memory and CPU usage with configurable limits
 - **Real-time monitoring**: Live progress tracking with detailed metrics display
 - **Flexible configuration**: YAML/JSON configuration files with environment variable overrides
+
+#### Request Ingestion and Parameter Injection
+- **URL-based selective targeting**: Primary feature for applying parameters to specific requests using URL patterns
+- **HTTP method filtering**: Target specific HTTP methods (GET, POST, PUT, DELETE) for precise control
+- **Multi-target parameter injection**: Support for headers, query parameters, and request bodies
+- **JSON request body modification**: Automatic parsing and modification of JSON request bodies
+- **Form data support**: URL-encoded form data parameter injection
+- **Advanced randomization**: Built-in random functions (UUID, numbers, strings, timestamps)
+- **Array-based selection**: Random selection from predefined arrays in variable context
+- **File-based data sources**: Random selection from external text files with caching
+- **Variable substitution**: Dynamic template variables with session and global scopes
+- **Intelligent error handling**: Graceful fallback for unsupported body formats
+- **Performance optimization**: File caching and efficient template processing
+- **Wildcard and regex patterns**: Flexible URL pattern matching for precise request targeting
 
 #### Kubernetes Integration
 - **Multi-environment support**: Local (Minikube, Kind, Docker Desktop) and cloud deployments
@@ -56,15 +81,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete API documentation with TypeScript definitions
 - Kubernetes deployment guide for all major cloud providers
 - Configuration guide with best practices and examples
+- **Request Ingestion Guide**: Comprehensive guide for parameter injection and request modification
+- **Request Filtering Guide**: Advanced guide for streaming-only mode and URL pattern filtering
+- **Parameter Randomization Guide**: Detailed guide for dynamic parameter generation
 - Troubleshooting guide with common issues and solutions
 - Contributing guidelines for open source development
 
 ### Examples
-- Basic load testing configuration
-- DRM testing with Widevine configuration
-- High concurrency testing setup
-- Prometheus metrics export configuration
-- OpenTelemetry integration example
+- **Organized examples directory**: All configuration examples moved to dedicated `examples/` folder
+- **[basic-load-test.json](examples/basic-load-test.json)**: Basic load testing configuration
+- **[drm-testing.yaml](examples/drm-testing.yaml)**: DRM testing with Widevine configuration
+- **[selective-parameters.yaml](examples/selective-parameters.yaml)**: URL-based selective parameter targeting (RECOMMENDED)
+- **[request-body-injection.yaml](examples/request-body-injection.yaml)**: Comprehensive request body modification examples
+- **[randomization-features.yaml](examples/randomization-features.yaml)**: Advanced randomization with built-in functions, arrays, and files
+- **Sample data files**: Organized data files in `examples/data/` for immediate use
+- **Examples documentation**: Comprehensive README with usage instructions and best practices
 
 ### Infrastructure
 - Docker multi-stage build with Alpine Linux base

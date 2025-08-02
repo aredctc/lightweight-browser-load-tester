@@ -1,0 +1,125 @@
+# Authenticated Session Load Test Example
+# This configuration demonstrates how to use localStorage to simulate
+# authenticated users for realistic load testing scenarios
+
+# Basic test configuration
+concurrentUsers: 5
+testDuration: 300  # 5 minutes
+rampUpTime: 30     # 30 seconds to ramp up all users
+streamingUrl: "https://streaming-platform.example.com/watch/premium-content"
+
+# Pre-populate localStorage to simulate authenticated users with randomized data
+localStorage:
+  # Main application domain - authentication and user data
+  - domain: "streaming-platform.example.com"
+    data:
+      # JWT authentication token with unique session ID
+      auth_token: "Bearer {{random:uuid}}"
+      
+      # User identification - randomized for different user scenarios
+      user_id: "{{randomFrom:userIds}}"
+      username: "testuser{{random:1-999}}@example.com"
+      
+      # Session information with unique identifiers
+      session_id: "sess-{{random:alphanumeric}}"
+      session_expires: "{{random:timestamp}}"
+      
+      # User preferences for streaming - randomized for diverse testing
+      playback_preferences: '{"quality":"{{randomFrom:videoQualities}}","autoplay":{{randomFrom:booleans}},"subtitles":"{{randomFrom:languages}}","volume":{{random:1-100}}}'
+      
+      # Subscription and account info - varied tiers for testing
+      subscription_tier: "{{randomFrom:subscriptionTiers}}"
+      subscription_expires: "{{random:timestamp}}"
+      account_status: "active"
+      
+      # Viewing history with randomized content IDs
+      recently_watched: '["content_{{random:1-1000}}","content_{{random:1-1000}}","content_{{random:1-1000}}"]'
+      continue_watching: '{"content_{{random:1-500}}":{"position":{{random:0-7200}},"duration":7200}}'
+      
+      # Feature flags for A/B testing - randomized feature combinations
+      feature_flags: '{"new_player_ui":{{randomFrom:booleans}},"beta_recommendations":{{randomFrom:booleans}},"hdr_support":{{randomFrom:booleans}}}'
+
+  # CDN domain - caching and performance data
+  - domain: "cdn.streaming-platform.example.com"
+    data:
+      # Cache versioning
+      cache_version: "v2.1.0"
+      asset_version: "20240108"
+      
+      # CDN preferences
+      preferred_server: "us-west-1"
+      bandwidth_preference: "auto"
+      
+      # Performance tracking
+      connection_quality: "high"
+      last_speed_test: '{"download":50.5,"upload":10.2,"latency":15}'
+
+  # Analytics domain - tracking and metrics
+  - domain: "analytics.streaming-platform.example.com"
+    data:
+      # User tracking
+      visitor_id: "visitor_xyz789"
+      session_start: "1704672000000"
+      
+      # Analytics preferences
+      analytics_consent: "granted"
+      tracking_preferences: '{"performance":true,"advertising":false,"functional":true}'
+
+# Request parameters for additional authentication
+requestParameters:
+  - target: "header"
+    name: "X-User-Token"
+    valueTemplate: "{{user_session_token}}"
+    scope: "per-session"
+  - target: "header"
+    name: "X-Device-ID"
+    valueTemplate: "device_{{random_id}}"
+    scope: "global"
+
+# Resource limits
+resourceLimits:
+  maxMemoryPerInstance: 768  # Higher memory for authenticated sessions
+  maxCpuPercentage: 85
+  maxConcurrentInstances: 8
+
+# Focus on streaming-related requests only
+streamingOnly: true
+
+# Always allow these patterns even in streaming-only mode
+allowedUrls:
+  - "*manifest*"
+  - "*playlist*"
+  - "*segment*"
+  - "*license*"
+  - "*auth*"
+  - "*api/user*"
+
+# Block analytics and tracking to focus on core functionality
+blockedUrls:
+  - "*analytics*"
+  - "*tracking*"
+  - "*ads*"
+  - "*marketing*"
+
+# DRM configuration for premium content
+drmConfig:
+  type: "widevine"
+  licenseUrl: "https://drm.streaming-platform.example.com/license"
+  certificateUrl: "https://drm.streaming-platform.example.com/certificate"
+  customHeaders:
+    X-DRM-Token: "drm_token_example"
+
+# Export metrics to Prometheus for monitoring
+prometheus:
+  enabled: false  # Set to true and configure endpoint for production
+  remoteWriteUrl: "https://prometheus.example.com/api/v1/write"
+  batchSize: 100
+  flushInterval: 10
+
+# OpenTelemetry configuration
+opentelemetry:
+  enabled: false  # Set to true and configure endpoint for production
+  endpoint: "https://otel-collector.example.com:4318/v1/metrics"
+  protocol: "http/protobuf"
+  serviceName: "streaming-load-test"
+  serviceVersion: "1.0.0"

@@ -1,0 +1,145 @@
+# localStorage Randomization Examples
+# This configuration demonstrates various randomization patterns for localStorage
+# to simulate diverse user scenarios and realistic load testing conditions
+
+# Basic test configuration
+concurrentUsers: 8
+testDuration: 180  # 3 minutes
+rampUpTime: 20     # 20 seconds to ramp up all users
+streamingUrl: "https://app.example.com/dashboard"
+
+# localStorage with comprehensive randomization patterns
+localStorage:
+  # Authentication domain - unique tokens and user data
+  - domain: "auth.app.example.com"
+    data:
+      # Unique authentication tokens for each browser instance
+      access_token: "Bearer {{random:uuid}}"
+      refresh_token: "refresh_{{random:alphanumeric}}"
+      
+      # Randomized user identification
+      user_id: "{{randomFrom:userIds}}"
+      username: "testuser{{random:1-999}}@example.com"
+      
+      # Session management with timestamps
+      session_id: "sess-{{random:alphanumeric}}"
+      session_start: "{{random:timestamp}}"
+      session_expires: "{{random:timestamp}}"
+      
+      # Device and security information
+      device_id: "device_{{random:1-9999}}"
+      device_fingerprint: "{{random:hex}}"
+      last_login_ip: "192.168.{{random:1-255}}.{{random:1-255}}"
+
+  # User preferences domain - randomized settings
+  - domain: "preferences.app.example.com"
+    data:
+      # UI preferences with randomized choices
+      theme: "{{randomFrom:themes}}"
+      language: "{{randomFrom:languages}}"
+      currency: "{{randomFrom:currencies}}"
+      timezone: "America/New_York"
+      
+      # Complex JSON preferences with randomization
+      ui_settings: '{"sidebar_collapsed":{{randomFrom:booleans}},"notifications_enabled":{{randomFrom:booleans}},"auto_save":{{randomFrom:booleans}}}'
+      
+      # Accessibility and display settings
+      font_size: "{{random:12-18}}"
+      high_contrast: "{{randomFrom:booleans}}"
+      reduced_motion: "{{randomFrom:booleans}}"
+
+  # Application data domain - user-specific content
+  - domain: "data.app.example.com"
+    data:
+      # Workspace and project data
+      active_workspace: "workspace_{{random:1-50}}"
+      recent_projects: '["project_{{random:1-100}}","project_{{random:1-100}}","project_{{random:1-100}}"]'
+      
+      # User activity and analytics
+      page_views: "{{random:1-1000}}"
+      session_duration: "{{random:300-7200}}"  # 5 minutes to 2 hours
+      feature_usage: '{"dashboard":{{random:1-100}},"reports":{{random:1-50}},"settings":{{random:1-20}}}'
+      
+      # Collaboration and sharing
+      shared_items: '["item_{{random:uuid}}","item_{{random:uuid}}"]'
+      team_memberships: '["team_{{random:1-20}}","team_{{random:1-20}}"]'
+
+  # Cache and performance domain
+  - domain: "cache.app.example.com"
+    data:
+      # Cache versioning and performance data
+      cache_version: "v{{random:1-10}}.{{random:0-99}}.{{random:0-99}}"
+      last_cache_clear: "{{random:timestamp}}"
+      
+      # Performance metrics
+      avg_load_time: "{{random:100-2000}}"  # milliseconds
+      connection_quality: "{{randomFrom:connectionQualities}}"
+      
+      # Feature flags and A/B testing
+      feature_flags: '{"new_dashboard":{{randomFrom:booleans}},"beta_features":{{randomFrom:booleans}},"experimental_ui":{{randomFrom:booleans}}}'
+      ab_test_group: "group_{{randomFrom:abTestGroups}}"
+
+  # Analytics and tracking domain
+  - domain: "analytics.app.example.com"
+    data:
+      # User tracking and behavior
+      visitor_id: "visitor_{{random:uuid}}"
+      first_visit: "{{random:timestamp}}"
+      return_visitor: "{{randomFrom:booleans}}"
+      
+      # Engagement metrics
+      total_sessions: "{{random:1-500}}"
+      bounce_rate: "{{random:10-80}}"
+      avg_session_duration: "{{random:60-1800}}"  # 1 minute to 30 minutes
+      
+      # Conversion tracking
+      conversion_events: '["signup","purchase","subscription"]'
+      funnel_stage: "{{randomFrom:funnelStages}}"
+
+# Request parameters that work with localStorage data
+requestParameters:
+  - target: "header"
+    name: "X-User-ID"
+    valueTemplate: "{{randomFrom:userIds}}"
+    scope: "per-session"
+  
+  - target: "header"
+    name: "X-Session-ID"
+    valueTemplate: "sess-{{random:alphanumeric}}"
+    scope: "per-session"
+  
+  - target: "header"
+    name: "X-Device-Type"
+    valueTemplate: "{{randomFrom:deviceTypes}}"
+    scope: "global"
+
+# Resource limits for handling multiple randomized instances
+resourceLimits:
+  maxMemoryPerInstance: 640  # Higher memory for complex localStorage data
+  maxCpuPercentage: 85
+  maxConcurrentInstances: 12
+
+# Focus on application requests
+streamingOnly: false
+allowedUrls:
+  - "*api*"
+  - "*auth*"
+  - "*preferences*"
+  - "*dashboard*"
+  - "*.js"
+  - "*.css"
+
+blockedUrls:
+  - "*analytics*"
+  - "*tracking*"
+  - "*ads*"
+  - "*marketing*"
+
+# Note: This configuration uses additional predefined arrays that would be available:
+# - connectionQualities: ['excellent', 'good', 'fair', 'poor']
+# - abTestGroups: ['A', 'B', 'C', 'control']
+# - funnelStages: ['awareness', 'interest', 'consideration', 'purchase', 'retention']
+#
+# These arrays can be extended in the browser pool configuration or loaded from files:
+# - "{{randomFromFile:./data/connection-types.txt}}"
+# - "{{randomFromFile:./data/test-groups.txt}}"

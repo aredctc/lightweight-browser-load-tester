@@ -37,7 +37,7 @@ describe('RequestInterceptor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     parameterTemplates = [
       {
         target: 'header',
@@ -120,7 +120,7 @@ describe('RequestInterceptor', () => {
   describe('updateContext', () => {
     it('should update variable context', () => {
       const updates = { customVar: 'updated-value', newVar: 'new-value' };
-      
+
       interceptor.updateContext(updates);
 
       // Test by checking if variable substitution works with updated values
@@ -192,7 +192,7 @@ describe('RequestInterceptor', () => {
     it('should modify JSON request body', () => {
       const jsonBody = '{"existing":"value"}';
       const result = (interceptor as any).modifyRequestBody(jsonBody, 'newField', 'newValue');
-      
+
       const parsed = JSON.parse(result);
       expect(parsed.existing).toBe('value');
       expect(parsed.newField).toBe('newValue');
@@ -201,7 +201,7 @@ describe('RequestInterceptor', () => {
     it('should modify form data request body', () => {
       const formBody = 'existing=value&other=data';
       const result = (interceptor as any).modifyRequestBody(formBody, 'newField', 'newValue');
-      
+
       const params = new URLSearchParams(result);
       expect(params.get('existing')).toBe('value');
       expect(params.get('other')).toBe('data');
@@ -262,7 +262,7 @@ describe('RequestInterceptor', () => {
 
       expect(result.modified).toBe(true);
       expect(result.modifiedPostData).toBeDefined();
-      
+
       const parsed = JSON.parse(result.modifiedPostData!);
       expect(parsed.requestId).toMatch(/^req_\d+$/);
     });
@@ -356,7 +356,7 @@ describe('RequestInterceptor', () => {
       const result = (interceptor as any).modifyRequest(request);
 
       expect(result.modified).toBe(false); // Should not modify on error
-      
+
       const errors = interceptor.getErrors();
       expect(errors.length).toBeGreaterThan(0);
 
@@ -419,10 +419,10 @@ describe('RequestInterceptor', () => {
 
       expect(size).toBeGreaterThan(0);
       // Should include URL length + headers + post data
-      const expectedMinSize = 'https://example.com/api/test'.length + 
-                             'Content-Type'.length + 'application/json'.length + 4 +
-                             'Authorization'.length + 'Bearer token123'.length + 4 +
-                             '{"test":"data"}'.length;
+      const expectedMinSize = 'https://example.com/api/test'.length +
+        'Content-Type'.length + 'application/json'.length + 4 +
+        'Authorization'.length + 'Bearer token123'.length + 4 +
+        '{"test":"data"}'.length;
       expect(size).toBeGreaterThanOrEqual(expectedMinSize);
     });
 
@@ -637,7 +637,7 @@ describe('RequestInterceptor', () => {
         currentTime += 1000; // Advance by 1 second each call
         return currentTime;
       });
-      
+
       interceptor.startStreamingMonitoring();
     });
 
@@ -796,7 +796,7 @@ describe('RequestInterceptor', () => {
       expect(size).toBeGreaterThan(0);
       // Should include header sizes
       const expectedMinSize = 'content-type'.length + 'application/json'.length + 4 +
-                             'cache-control'.length + 'no-cache'.length + 4;
+        'cache-control'.length + 'no-cache'.length + 4;
       expect(size).toBeGreaterThanOrEqual(expectedMinSize);
     });
 
@@ -828,7 +828,446 @@ describe('RequestInterceptor', () => {
     });
   });
 
-  // NEW TESTS FOR OUR IMPLEMENTED FEATURES
+  // NEW TESTS FOR SELECTIVE REQUEST TARGETING
+  describe('selective request targeting', () => {
+    let selectiveInterceptor: RequestInterceptor;
+    let _mockRoute: any;
+
+    beforeEach(() => {
+      _mockRoute = {
+        continue: vi.fn(),
+        abort: vi.fn()
+      };
+
+      const selectiveTemplates: ParameterTemplate[] = [
+        {
+          target: 'header',
+          name: 'X-API-Token',
+          valueTemplate: 'api_{{random:uuid}}',
+          scope: 'per-session',
+          urlPattern: '*/api/*'
+        },
+        {
+          target: 'header',
+          name: 'X-Auth-Token',
+          valueTemplate: 'auth_{{sessionId}}',
+          scope: 'per-session',
+          urlPattern: '*/auth/*',
+          method: 'POST'
+        },
+        {
+          target: 'query',
+          name: 'manifest_id',
+          valueTemplate: '{{random:alphanumeric}}',
+          scope: 'global',
+          urlPattern: '*.m3u8'
+        },
+        {
+          target: 'body',
+          name: 'analytics_data',
+          valueTemplate: '{"timestamp": {{timestamp}}}',
+          scope: 'per-session',
+          urlPattern: '*/analytics/*',
+          method: 'POST'
+        }
+      ];
+
+      selectiveInterceptor = new RequestInterceptor(
+        mockPage as any,
+        selectiveTemplates,
+        { sessionId: 'test-session-123' },
+        false, // streamingOnly = false
+        [], // allowedUrls
+        [] // blockedUrls
+      );
+    });
+
+    describe('shouldApplyTemplate', () => {
+      it('should apply template when no filters are specified', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-Global',
+          valueTemplate: 'global',
+          scope: 'global'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/any/url',
+          'GET'
+        );
+
+        expect(result).toBe(true);
+      });
+
+      it('should apply template when URL pattern matches', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-API',
+          valueTemplate: 'api',
+          scope: 'global',
+          urlPattern: '*/api/*'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/api/users',
+          'GET'
+        );
+
+        expect(result).toBe(true);
+      });
+
+      it('should not apply template when URL pattern does not match', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-API',
+          valueTemplate: 'api',
+          scope: 'global',
+          urlPattern: '*/api/*'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/static/image.jpg',
+          'GET'
+        );
+
+        expect(result).toBe(false);
+      });
+
+      it('should apply template when HTTP method matches', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-POST',
+          valueTemplate: 'post',
+          scope: 'global',
+          method: 'POST'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/any/url',
+          'POST'
+        );
+
+        expect(result).toBe(true);
+      });
+
+      it('should not apply template when HTTP method does not match', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-POST',
+          valueTemplate: 'post',
+          scope: 'global',
+          method: 'POST'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/any/url',
+          'GET'
+        );
+
+        expect(result).toBe(false);
+      });
+
+      it('should apply template when both URL pattern and method match', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-AUTH',
+          valueTemplate: 'auth',
+          scope: 'global',
+          urlPattern: '*/auth/*',
+          method: 'POST'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/auth/login',
+          'POST'
+        );
+
+        expect(result).toBe(true);
+      });
+
+      it('should not apply template when URL matches but method does not', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-AUTH',
+          valueTemplate: 'auth',
+          scope: 'global',
+          urlPattern: '*/auth/*',
+          method: 'POST'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/auth/login',
+          'GET'
+        );
+
+        expect(result).toBe(false);
+      });
+
+      it('should not apply template when method matches but URL does not', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-AUTH',
+          valueTemplate: 'auth',
+          scope: 'global',
+          urlPattern: '*/auth/*',
+          method: 'POST'
+        };
+
+        const result = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/api/users',
+          'POST'
+        );
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('URL pattern matching', () => {
+      it('should match wildcard patterns', () => {
+        const patterns = [
+          { pattern: '*/api/*', url: 'https://example.com/api/users', expected: true },
+          { pattern: '*/api/*', url: 'https://example.com/static/image.jpg', expected: false },
+          { pattern: '*.m3u8', url: 'https://cdn.example.com/playlist.m3u8', expected: true },
+          { pattern: '*.m3u8', url: 'https://cdn.example.com/segment.ts', expected: false },
+          { pattern: '*staging*', url: 'https://staging.example.com/api', expected: true },
+          { pattern: '*staging*', url: 'https://prod.example.com/api', expected: false }
+        ];
+
+        patterns.forEach(({ pattern, url, expected }) => {
+          const result = (selectiveInterceptor as any).matchesUrlPattern(url, pattern);
+          expect(result).toBe(expected);
+        });
+      });
+
+      it('should match regex patterns', () => {
+        const patterns = [
+          {
+            pattern: '/^https:\\/\\/cdn[0-9]+\\.example\\.com/',
+            url: 'https://cdn1.example.com/file.js',
+            expected: true
+          },
+          {
+            pattern: '/^https:\\/\\/cdn[0-9]+\\.example\\.com/',
+            url: 'https://api.example.com/file.js',
+            expected: false
+          },
+          {
+            pattern: '/api\\/v[0-9]+/',
+            url: 'https://example.com/api/v2/users',
+            expected: true
+          },
+          {
+            pattern: '/api\\/v[0-9]+/',
+            url: 'https://example.com/api/users',
+            expected: false
+          }
+        ];
+
+        patterns.forEach(({ pattern, url, expected }) => {
+          const result = (selectiveInterceptor as any).matchesUrlPattern(url, pattern);
+          expect(result).toBe(expected);
+        });
+      });
+
+      it('should handle invalid regex patterns gracefully', () => {
+        const result = (selectiveInterceptor as any).matchesUrlPattern(
+          'https://example.com/api/users',
+          '/[invalid regex/'
+        );
+
+        // Should fall back to string matching
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('selective parameter application', () => {
+      it('should apply parameters only to matching API requests', () => {
+        const request = {
+          url: 'https://example.com/api/users',
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          postData: undefined
+        };
+
+        const result = (selectiveInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(true);
+        expect(result.modifiedHeaders).toHaveProperty('X-API-Token');
+        expect(result.modifiedHeaders['X-API-Token']).toMatch(/^api_[a-f0-9-]+$/);
+        expect(result.modifiedHeaders).not.toHaveProperty('X-Auth-Token');
+      });
+
+      it('should apply parameters only to matching auth POST requests', () => {
+        const request = {
+          url: 'https://example.com/auth/login',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          postData: '{"username": "test"}'
+        };
+
+        const result = (selectiveInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(true);
+        expect(result.modifiedHeaders).toHaveProperty('X-Auth-Token');
+        expect(result.modifiedHeaders['X-Auth-Token']).toBe('auth_test-session-123');
+      });
+
+      it('should not apply auth parameters to auth GET requests', () => {
+        const request = {
+          url: 'https://example.com/auth/status',
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          postData: undefined
+        };
+
+        const result = (selectiveInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(false);
+        expect(result.modifiedHeaders).toBeUndefined();
+      });
+
+      it('should apply query parameters to manifest requests', () => {
+        const request = {
+          url: 'https://cdn.example.com/playlist.m3u8',
+          method: 'GET',
+          headers: {},
+          postData: undefined
+        };
+
+        const result = (selectiveInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(true);
+        expect(result.modifiedUrl).toContain('manifest_id=');
+        expect(result.modifiedUrl).toMatch(/manifest_id=[A-Za-z0-9]{8}/);
+      });
+
+      it('should apply body parameters to analytics POST requests', () => {
+        const request = {
+          url: 'https://example.com/analytics/track',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          postData: '{"event": "click"}'
+        };
+
+        const result = (selectiveInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(true);
+        expect(result.modifiedPostData).toBeDefined();
+
+        const parsedBody = JSON.parse(result.modifiedPostData!);
+        expect(parsedBody.event).toBe('click');
+        expect(parsedBody.analytics_data).toEqual({ timestamp: expect.any(Number) });
+      });
+
+      it('should not apply parameters to non-matching requests', () => {
+        const request = {
+          url: 'https://example.com/static/image.jpg',
+          method: 'GET',
+          headers: {},
+          postData: undefined
+        };
+
+        const result = (selectiveInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(false);
+        expect(result.modifiedHeaders).toBeUndefined();
+        expect(result.modifiedUrl).toBeUndefined();
+      });
+
+      it('should apply multiple parameters when multiple patterns match', () => {
+        // Create interceptor with overlapping patterns
+        const overlappingTemplates: ParameterTemplate[] = [
+          {
+            target: 'header',
+            name: 'X-API-Token',
+            valueTemplate: 'api_token',
+            scope: 'global',
+            urlPattern: '*/api/*'
+          },
+          {
+            target: 'header',
+            name: 'X-Service-Token',
+            valueTemplate: 'service_token',
+            scope: 'global',
+            urlPattern: '*/api/service/*'
+          },
+          {
+            target: 'query',
+            name: 'version',
+            valueTemplate: 'v2',
+            scope: 'global',
+            urlPattern: '*/api/*'
+          }
+        ];
+
+        const overlappingInterceptor = new RequestInterceptor(
+          mockPage as any,
+          overlappingTemplates,
+          { sessionId: 'test' }
+        );
+
+        const request = {
+          url: 'https://example.com/api/service/users',
+          method: 'GET',
+          headers: {},
+          postData: undefined
+        };
+
+        const result = (overlappingInterceptor as any).modifyRequest(request);
+
+        expect(result.modified).toBe(true);
+        expect(result.modifiedHeaders).toHaveProperty('X-API-Token', 'api_token');
+        expect(result.modifiedHeaders).toHaveProperty('X-Service-Token', 'service_token');
+        expect(result.modifiedUrl).toContain('version=v2');
+      });
+    });
+
+    describe('case sensitivity', () => {
+      it('should handle HTTP method case insensitively', () => {
+        const template: ParameterTemplate = {
+          target: 'header',
+          name: 'X-POST',
+          valueTemplate: 'post',
+          scope: 'global',
+          method: 'post'  // lowercase
+        };
+
+        const resultUpper = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/any/url',
+          'POST'  // uppercase
+        );
+
+        const resultLower = (selectiveInterceptor as any).shouldApplyTemplate(
+          template,
+          'https://example.com/any/url',
+          'post'  // lowercase
+        );
+
+        expect(resultUpper).toBe(true);
+        expect(resultLower).toBe(true);
+      });
+
+      it('should handle URL pattern matching case insensitively', () => {
+        const result = (selectiveInterceptor as any).matchesUrlPattern(
+          'https://EXAMPLE.COM/API/users',  // uppercase
+          '*/api/*'  // lowercase pattern
+        );
+
+        expect(result).toBe(true);
+      });
+    });
+  });
+
+  // EXISTING STREAMING-ONLY MODE TESTS
   describe('streaming-only mode', () => {
     let streamingOnlyInterceptor: RequestInterceptor;
     let mockRoute: any;
@@ -902,6 +1341,173 @@ describe('RequestInterceptor', () => {
       expect(mockRoute.continue).toHaveBeenCalled();
       expect(mockRoute.abort).not.toHaveBeenCalled();
       expect(regularInterceptor.getBlockedRequestCount()).toBe(0);
+    });
+  });
+
+  describe('integration with selective targeting and streaming-only mode', () => {
+    let hybridInterceptor: RequestInterceptor;
+    let mockRoute: any;
+
+    beforeEach(() => {
+      mockRoute = {
+        continue: vi.fn(),
+        abort: vi.fn()
+      };
+
+      const hybridTemplates: ParameterTemplate[] = [
+        {
+          target: 'header',
+          name: 'X-Streaming-Token',
+          valueTemplate: 'stream_{{random:uuid}}',
+          scope: 'per-session',
+          urlPattern: '*.m3u8'
+        },
+        {
+          target: 'header',
+          name: 'X-API-Token',
+          valueTemplate: 'api_{{sessionId}}',
+          scope: 'per-session',
+          urlPattern: '*/api/*'
+        }
+      ];
+
+      hybridInterceptor = new RequestInterceptor(
+        mockPage as any,
+        hybridTemplates,
+        { sessionId: 'test-session-123' },
+        true, // streamingOnly = true
+        ['*/api/essential/*'], // allowedUrls
+        ['*analytics*'] // blockedUrls
+      );
+    });
+
+    it('should apply selective parameters to allowed streaming requests', () => {
+      const request = {
+        url: 'https://cdn.example.com/playlist.m3u8',
+        method: 'GET',
+        headers: {},
+        postData: undefined
+      };
+
+      const result = (hybridInterceptor as any).modifyRequest(request);
+
+      expect(result.modified).toBe(true);
+      expect(result.modifiedHeaders).toHaveProperty('X-Streaming-Token');
+      expect(result.modifiedHeaders['X-Streaming-Token']).toMatch(/^stream_[a-f0-9-]+$/);
+    });
+
+    it('should apply selective parameters to allowed API requests', () => {
+      const request = {
+        url: 'https://example.com/api/essential/config',
+        method: 'GET',
+        headers: {},
+        postData: undefined
+      };
+
+      const result = (hybridInterceptor as any).modifyRequest(request);
+
+      expect(result.modified).toBe(true);
+      expect(result.modifiedHeaders).toHaveProperty('X-API-Token');
+      expect(result.modifiedHeaders['X-API-Token']).toBe('api_test-session-123');
+    });
+
+    it('should not apply parameters to blocked requests even if pattern matches', async () => {
+      const blockedUrl = 'https://example.com/api/analytics/track';
+      mockRequest.url.mockReturnValue(blockedUrl);
+      mockRequest.method.mockReturnValue('GET');
+
+      await (hybridInterceptor as any).handleRequest(mockRoute, mockRequest);
+
+      expect(mockRoute.abort).toHaveBeenCalledWith('blockedbyclient');
+      expect(mockRoute.continue).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error handling in selective targeting', () => {
+    let errorInterceptor: RequestInterceptor;
+
+    beforeEach(() => {
+      const errorTemplates: ParameterTemplate[] = [
+        {
+          target: 'header',
+          name: 'X-Test',
+          valueTemplate: '{{invalidVariable}}',
+          scope: 'per-session',
+          urlPattern: '*/api/*'
+        }
+      ];
+
+      errorInterceptor = new RequestInterceptor(
+        mockPage as any,
+        errorTemplates,
+        { sessionId: 'test-session' }
+      );
+    });
+
+    it('should handle template errors gracefully and continue processing', () => {
+      const request = {
+        url: 'https://example.com/api/users',
+        method: 'GET',
+        headers: {},
+        postData: undefined
+      };
+
+      const result = (errorInterceptor as any).modifyRequest(request);
+
+      // Should still process the request even with template error
+      expect(result.modified).toBe(true);
+      expect(result.modifiedHeaders).toHaveProperty('X-Test', '{{invalidVariable}}');
+
+      // Should log the error
+      const errors = errorInterceptor.getErrors();
+      expect(errors.length).toBeGreaterThan(0);
+    });
+
+    it('should skip templates that do not match URL pattern', () => {
+      const request = {
+        url: 'https://example.com/static/image.jpg',
+        method: 'GET',
+        headers: {},
+        postData: undefined
+      };
+
+      const result = (errorInterceptor as any).modifyRequest(request);
+
+      expect(result.modified).toBe(false);
+      expect(result.modifiedHeaders).toBeUndefined();
+    });
+  });
+
+  describe('streaming-only mode', () => {
+    let streamingOnlyInterceptor: RequestInterceptor;
+    let mockRoute: any;
+
+    beforeEach(() => {
+      mockRoute = {
+        continue: vi.fn(),
+        abort: vi.fn()
+      };
+
+      streamingOnlyInterceptor = new RequestInterceptor(
+        mockPage as any,
+        [],
+        { sessionId: 'test-session' },
+        true, // streamingOnly = true
+        [], // allowedUrls
+        [] // blockedUrls
+      );
+    });
+
+    it('should block non-streaming requests when streaming-only is enabled', async () => {
+      const nonStreamingUrl = 'https://example.com/analytics/track';
+      mockRequest.url.mockReturnValue(nonStreamingUrl);
+      mockRequest.method.mockReturnValue('GET');
+
+      await (streamingOnlyInterceptor as any).handleRequest(mockRoute, mockRequest);
+
+      expect(mockRoute.abort).toHaveBeenCalledWith('blockedbyclient');
+      expect(mockRoute.continue).not.toHaveBeenCalled();
+      expect(streamingOnlyInterceptor.getBlockedRequestCount()).toBe(1);
     });
   });
 
@@ -1104,12 +1710,12 @@ describe('RequestInterceptor', () => {
     it('should handle invalid regex patterns gracefully', () => {
       const url = 'https://example.com/test';
       const invalidPattern = '/[invalid regex/';
-      
+
       const result = (interceptor as any).matchesUrlPattern(url, invalidPattern);
-      
+
       // Should fall back to substring matching
       expect(result).toBe(false);
-      
+
       // Should log an error
       const errors = interceptor.getErrors();
       expect(errors.some(error => error.message === 'Invalid URL pattern')).toBe(true);

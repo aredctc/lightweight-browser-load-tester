@@ -1,0 +1,9 @@
+# Session types for load testing
+premium
+basic
+guest
+trial
+enterprise
+developer
+beta
+standard

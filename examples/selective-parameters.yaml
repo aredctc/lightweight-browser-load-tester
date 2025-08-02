@@ -1,0 +1,187 @@
+# Example configuration demonstrating selective parameter injection
+# This shows how to target specific requests using URL patterns and HTTP methods
+
+concurrentUsers: 8
+testDuration: 300
+rampUpTime: 30
+streamingUrl: "https://api.example.com/streaming"
+streamingOnly: true
+
+# Resource limits
+resourceLimits:
+  maxMemoryPerInstance: 512
+  maxCpuPercentage: 80
+  maxConcurrentInstances: 15
+
+# Selective parameter injection examples
+requestParameters:
+  # 1. Apply to ALL requests (no urlPattern or method specified)
+  - target: header
+    name: "X-Global-Request-ID"
+    valueTemplate: "{{random:uuid}}"
+    scope: global
+  
+  # 2. Apply only to API authentication endpoints
+  - target: header
+    name: "Authorization"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
+    scope: per-session
+    urlPattern: "*/api/auth/*"  # Only match auth API calls
+  
+  # 3. Apply only to streaming manifest requests
+  - target: header
+    name: "X-Manifest-Request-ID"
+    valueTemplate: "manifest_{{random:uuid}}"
+    scope: global
+    urlPattern: "*.m3u8"  # Only HLS manifest files
+  
+  # 4. Apply only to license requests (DRM)
+  - target: header
+    name: "X-DRM-Session-ID"
+    valueTemplate: "drm_{{sessionId}}_{{random:alphanumeric}}"
+    scope: per-session
+    urlPattern: "*/license*"  # Only license endpoints
+  
+  # 5. Apply only to POST requests to analytics endpoints
+  - target: body
+    name: "sessionMetadata"
+    valueTemplate: |
+      {
+        "sessionId": "{{sessionId}}",
+        "timestamp": {{timestamp}},
+        "requestCount": {{requestCount}},
+        "userAgent": "{{randomFrom:userAgents}}"
+      }
+    scope: per-session
+    urlPattern: "*/analytics/*"
+    method: "POST"  # Only POST requests
+  
+  # 6. Apply only to segment requests (media files)
+  - target: query
+    name: "segment_id"
+    valueTemplate: "seg_{{requestCount}}"
+    scope: global
+    urlPattern: "*.ts"  # Only transport stream segments
+  
+  # 7. Apply to specific API version endpoints
+  - target: header
+    name: "X-API-Version"
+    valueTemplate: "{{randomFrom:apiVersions}}"
+    scope: per-session
+    urlPattern: "*/api/v2/*"  # Only v2 API endpoints
+  
+  # 8. Apply only to PUT/PATCH requests for user data
+  - target: body
+    name: "lastModified"
+    valueTemplate: "{{timestamp}}"
+    scope: global
+    urlPattern: "*/api/user/*"
+    method: "PUT"  # Only PUT requests to user endpoints
+  
+  # 9. Apply to specific streaming server using regex pattern
+  - target: header
+    name: "X-CDN-Preference"
+    valueTemplate: "{{randomFrom:cdnRegions}}"
+    scope: per-session
+    urlPattern: "/^https:\\/\\/cdn[0-9]+\\.example\\.com/"  # Regex for CDN servers
+  
+  # 10. Apply only to WebSocket upgrade requests
+  - target: header
+    name: "X-WebSocket-Session"
+    valueTemplate: "ws_{{sessionId}}_{{random:timestamp}}"
+    scope: per-session
+    urlPattern: "*/websocket*"
+    method: "GET"  # WebSocket upgrades are GET requests
+  
+  # 11. Apply to heartbeat/ping endpoints
+  - target: body
+    name: "heartbeat"
+    valueTemplate: |
+      {
+        "timestamp": {{timestamp}},
+        "sessionId": "{{sessionId}}",
+        "status": "alive"
+      }
+    scope: global
+    urlPattern: "*/heartbeat"
+    method: "POST"
+  
+  # 12. Apply different auth tokens based on environment
+  - target: header
+    name: "X-Environment-Token"
+    valueTemplate: "{{randomFromFile:./examples/data/staging-tokens.txt}}"
+    scope: per-session
+    urlPattern: "*staging*"  # Only staging environment requests
+  
+  # 13. Apply to specific content type requests
+  - target: header
+    name: "Accept"
+    valueTemplate: "application/vnd.apple.mpegurl"
+    scope: global
+    urlPattern: "*/playlist*"  # Only playlist requests
+  
+  # 14. Apply custom headers to analytics POST requests
+  - target: header
+    name: "X-Analytics-Version"
+    valueTemplate: "{{randomFrom:analyticsVersions}}"
+    scope: per-session
+    urlPattern: "*/track*"
+    method: "POST"
+  
+  # 15. Apply user context to profile API calls
+  - target: body
+    name: "userContext"
+    valueTemplate: |
+      {
+        "userId": {{random:1-10000}},
+        "tier": "{{randomFrom:userTiers}}",
+        "region": "{{randomFrom:regions}}",
+        "deviceType": "{{randomFrom:deviceTypes}}"
+      }
+    scope: per-session
+    urlPattern: "*/api/profile/*"
+    method: "GET"
+
+# Variable context for randomFrom functions
+variableContext:
+  userAgents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    - "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15"
+  
+  apiVersions:
+    - "2.0"
+    - "2.1"
+    - "2.2"
+  
+  cdnRegions:
+    - "us-east"
+    - "us-west"
+    - "eu-central"
+  
+  analyticsVersions:
+    - "1.0"
+    - "1.1"
+    - "2.0"
+  
+  userTiers:
+    - "free"
+    - "premium"
+    - "enterprise"
+  
+  regions:
+    - "us"
+    - "eu"
+    - "asia"
+  
+  deviceTypes:
+    - "mobile"
+    - "desktop"
+    - "tablet"
+
+# Prometheus metrics export
+prometheus:
+  enabled: true
+  remoteWriteUrl: "http://localhost:9090/api/v1/write"
+  batchSize: 50
+  flushInterval: 30

@@ -10,6 +10,7 @@ A lightweight load testing tool that uses real browsers to test streaming applic
 
 - **Real Browser Testing**: Uses Playwright with Chromium for authentic user behavior simulation
 - **DRM Support**: Built-in support for Widevine, PlayReady, and FairPlay DRM systems
+- **Authenticated Session Simulation**: Pre-populate browser localStorage by domain to simulate authenticated users
 - **Advanced Request Filtering**: Block non-streaming requests to save compute power with fine-grained control
 - **Resource Efficient**: Optimized for minimal memory and CPU usage per browser instance
 - **Parameter Injection**: Dynamic modification of API requests with advanced randomization support
@@ -378,6 +379,92 @@ The tool automatically collects DRM-specific metrics:
 - DRM-specific error tracking
 - License server response analysis
 
+## Authenticated Session Simulation
+
+The localStorage feature allows you to pre-populate browser localStorage with authentication tokens, user preferences, and application state to simulate authenticated users. This is essential for testing scenarios where applications rely on existing browser storage data.
+
+### Why Use localStorage?
+
+Many modern web applications store critical data in localStorage:
+- Authentication tokens and session data
+- User preferences and settings
+- Application state and cached data
+- Feature flags and A/B test configurations
+
+Without pre-populated localStorage, your tests might fail to access protected resources or trigger authentication flows instead of testing actual functionality.
+
+### Basic Configuration
+
+```yaml
+localStorage:
+  - domain: "streaming-service.com"
+    data:
+      auth_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      user_id: "user_12345"
+      subscription_tier: "premium"
+      playback_quality: "1080p"
+  - domain: "cdn.streaming-service.com"
+    data:
+      cache_version: "v2.1.0"
+      preferred_server: "us-west-1"
+```
+
+### Common Use Cases
+
+**Authentication Tokens:**
+```yaml
+localStorage:
+  - domain: "myapp.com"
+    data:
+      access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      refresh_token: "def50200a1b2c3d4e5f6..."
+      user_id: "user_12345"
+```
+
+**Randomized User Data:**
+```yaml
+localStorage:
+  - domain: "streaming-service.com"
+    data:
+      auth_token: "Bearer {{random:uuid}}"
+      user_id: "{{randomFrom:userIds}}"
+      session_id: "sess-{{random:alphanumeric}}"
+      preferences: '{"quality":"{{randomFrom:videoQualities}}","theme":"{{randomFrom:themes}}"}'
+      timestamp: "{{random:timestamp}}"
+```
+
+**Application State:**
+```yaml
+localStorage:
+  - domain: "ecommerce.com"
+    data:
+      cart_items: '[{"id":"{{random:uuid}}","quantity":{{random:1-5}}}]'
+      recently_viewed: '["prod_{{random:1-1000}}","prod_{{random:1-1000}}"]'
+      user_location: '{"country":"US","currency":"{{randomFrom:currencies}}"}'
+```
+
+### Multi-Domain Support
+
+Configure localStorage for applications spanning multiple domains:
+
+```yaml
+localStorage:
+  - domain: "main-app.com"
+    data:
+      auth_token: "main_app_token_123"
+      user_session: "sess_main_456"
+  - domain: "api.main-app.com"
+    data:
+      api_version: "v3"
+      rate_limit_remaining: "1000"
+  - domain: "cdn.main-app.com"
+    data:
+      cache_version: "v2.1.0"
+      asset_preferences: '{"webp_support":true}'
+```
+
+See the [localStorage Guide](docs/LOCALSTORAGE_GUIDE.md) for comprehensive documentation and examples.
+
 ## Request Filtering
 
 The tool provides advanced request filtering capabilities to optimize resource usage and focus testing on streaming-specific requests. This is particularly useful for reducing CPU and memory consumption during load testing.
@@ -429,7 +516,33 @@ See the [Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md) for detailed 
 
 ## Parameter Injection
 
-Dynamically modify API requests during page interactions with powerful randomization capabilities:
+Dynamically modify specific API requests using **URL-based targeting** with powerful randomization capabilities. The key feature is **selective request targeting** - applying different parameters to different endpoints.
+
+### URL-Based Request Targeting (Primary Feature)
+```yaml
+requestParameters:
+  # Target authentication endpoints only
+  - target: header
+    name: "Authorization"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
+    scope: per-session
+    urlPattern: "*/api/auth/*"  # Only auth endpoints
+  
+  # Target streaming manifest files only
+  - target: header
+    name: "Accept"
+    valueTemplate: "application/vnd.apple.mpegurl"
+    scope: global
+    urlPattern: "*.m3u8"  # Only HLS manifests
+  
+  # Target analytics POST requests only
+  - target: body
+    name: "sessionData"
+    valueTemplate: '{"sessionId": "{{sessionId}}", "timestamp": {{timestamp}}}'
+    scope: per-session
+    urlPattern: "*/analytics/*"
+    method: "POST"  # Only POST to analytics
+```
 
 ### Built-in Random Functions
 ```yaml
@@ -438,19 +551,12 @@ requestParameters:
     name: "X-Request-ID"
     valueTemplate: "{{random:uuid}}"
     scope: per-session
+    urlPattern: "*/api/*"  # Target API endpoints
   - target: query
     name: "userId"
     valueTemplate: "{{random:1-10000}}"
     scope: per-session
-```
-
-### Random Selection from Arrays
-```yaml
-requestParameters:
-  - target: header
-    name: "User-Agent"
-    valueTemplate: "{{randomFrom:userAgents}}"
-    scope: per-session
+    urlPattern: "*/user/*"  # Target user endpoints
 ```
 
 ### Random Selection from Files
@@ -458,43 +564,49 @@ requestParameters:
 requestParameters:
   - target: header
     name: "Authorization"
-    valueTemplate: "Bearer {{randomFromFile:./data/auth-tokens.txt}}"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/auth-tokens.txt}}"
     scope: per-session
+    urlPattern: "*/api/auth/*"  # Only auth endpoints
 ```
-
-### Basic Parameter Templates
 
 ### Parameter Types
 
-- **Headers**: Modify HTTP headers
-- **Query Parameters**: Add/modify URL query parameters  
-- **Request Body**: Modify POST/PUT request bodies
+- **Headers**: Modify HTTP headers for specific URL patterns
+- **Query Parameters**: Add/modify URL query parameters for targeted requests
+- **Request Body**: Modify POST/PUT request bodies (JSON and form data supported)
 
-### Variable Substitution
+### URL Pattern Syntax
 
-Use template variables in parameter values:
+- **Wildcards**: `*/api/*` (matches any API endpoint)
+- **File extensions**: `*.m3u8` (matches HLS manifests)
+- **Regex patterns**: `/^https:\/\/cdn[0-9]+\.example\.com/` (CDN servers)
+- **Method filtering**: Combine with `method: "POST"` for precise targeting
 
-- `{{sessionId}}`: Unique session identifier
-- `{{timestamp}}`: Current timestamp
-- `{{random}}`: Random number
-- `{{token}}`: Authentication token (if configured)
-
-### Example Configuration
+### Complete Example Configuration
 
 ```yaml
 requestParameters:
+  # Authentication for API endpoints
   - target: header
     name: "Authorization"
-    valueTemplate: "Bearer {{token}}"
+    valueTemplate: "Bearer {{randomFromFile:./examples/data/api-tokens.txt}}"
     scope: per-session
+    urlPattern: "*/api/*"
+  
+  # User tracking for specific services
   - target: query
     name: "userId"
-    valueTemplate: "user_{{sessionId}}_{{random}}"
+    valueTemplate: "user_{{sessionId}}"
     scope: per-session
+    urlPattern: "*/service/user/*"
+  
+  # Request metadata for analytics POST requests
   - target: body
-    name: "timestamp"
-    valueTemplate: "{{timestamp}}"
-    scope: global
+    name: "clientInfo"
+    valueTemplate: '{"sessionId": "{{sessionId}}", "timestamp": {{timestamp}}, "deviceType": "{{randomFrom:deviceTypes}}"}'
+    scope: per-session
+    urlPattern: "*/analytics/*"
+    method: "POST"
 ```
 
 ## Monitoring and Metrics
@@ -609,7 +721,9 @@ htop  # or similar system monitor
 ## Documentation
 
 - **[Configuration Guide](docs/CONFIGURATION_GUIDE.md)**: Detailed configuration options and examples
+- **[Request Ingestion Guide](docs/REQUEST_INGESTION_GUIDE.md)**: Comprehensive guide for parameter injection and request modification
 - **[Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md)**: Complete guide to request filtering, streaming-only mode, and URL patterns
+- **[Parameter Randomization Guide](docs/RANDOMIZATION_GUIDE.md)**: Advanced guide for dynamic parameter generation and randomization
 - **[Kubernetes Deployment Guide](docs/KUBERNETES_DEPLOYMENT.md)**: Complete guide for deploying on Kubernetes (local, AWS EKS, GKE, AKS)
 - **[API Documentation](API.md)**: Complete API reference for all classes and interfaces
 - **[Troubleshooting Guide](TROUBLESHOOTING.md)**: Solutions to common issues and problems
@@ -650,11 +764,15 @@ See the [API Documentation](API.md) for detailed information about all public in
 
 ## Examples
 
-The `test-configs/` directory contains example configurations for common scenarios:
+The `examples/` directory contains practical configuration examples for common scenarios:
 
-- `example-basic.json`: Basic load testing configuration
-- `example-drm.yaml`: DRM testing with Widevine
-- `example-prometheus.json`: Configuration with Prometheus metrics export
+- **[basic-load-test.json](examples/basic-load-test.json)**: Basic load testing configuration
+- **[drm-testing.yaml](examples/drm-testing.yaml)**: DRM testing with Widevine
+- **[selective-parameters.yaml](examples/selective-parameters.yaml)**: URL-based selective parameter targeting (RECOMMENDED)
+- **[request-body-injection.yaml](examples/request-body-injection.yaml)**: Request body modification examples
+- **[randomization-features.yaml](examples/randomization-features.yaml)**: Advanced randomization features
+
+See the [Examples README](examples/README.md) for detailed descriptions and usage instructions.
 
 ## Open Source
 
@@ -809,7 +927,7 @@ The only requirement is to include the original copyright notice and license tex
 - **[GitHub Issues](https://github.com/YOUR_USERNAME/lightweight-browser-load-tester/issues)**: Report bugs and request features
 - **[GitHub Discussions](https://github.com/YOUR_USERNAME/lightweight-browser-load-tester/discussions)**: Ask questions and get community help
 - **[Documentation](docs/)**: Comprehensive guides and API documentation
-- **[Examples](test-configs/)**: Configuration examples for common scenarios
+- **[Examples](examples/)**: Configuration examples for common scenarios
 
 ### Self-Service Resources
 

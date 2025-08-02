@@ -20,6 +20,8 @@ export interface ParameterTemplate {
   name: string;
   valueTemplate: string; // supports variable substitution
   scope: 'global' | 'per-session';
+  urlPattern?: string; // Optional URL pattern to match (supports wildcards and regex)
+  method?: string; // Optional HTTP method to match (GET, POST, etc.)
 }
 
 /**
@@ -79,6 +81,7 @@ export interface TestConfiguration {
   drmConfig?: DRMConfiguration;
   requestParameters: ParameterTemplate[];
   resourceLimits: ResourceLimits;
+  localStorage?: LocalStorageEntry[]; // Pre-populate localStorage for authenticated sessions
   prometheus?: PrometheusConfiguration;
   opentelemetry?: OpenTelemetryConfiguration;
 }
@@ -196,6 +199,14 @@ export interface TestResults {
 }
 
 /**
+ * Local storage entry for a specific domain
+ */
+export interface LocalStorageEntry {
+  domain: string;
+  data: Record<string, string>;
+}
+
+/**
  * Browser pool configuration options
  */
 export interface BrowserPoolConfig {
@@ -206,6 +217,7 @@ export interface BrowserPoolConfig {
     headless?: boolean;
     args?: string[];
   };
+  localStorage?: LocalStorageEntry[];
 }
 
 /**

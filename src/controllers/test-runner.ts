@@ -110,6 +110,7 @@ export class TestRunner extends EventEmitter {
       maxInstances: config.resourceLimits.maxConcurrentInstances,
       minInstances: Math.min(2, config.concurrentUsers),
       resourceLimits: config.resourceLimits,
+      localStorage: config.localStorage,
       browserOptions: {
         headless: true,
         args: [

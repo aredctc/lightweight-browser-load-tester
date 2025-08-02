@@ -1,8 +1,8 @@
-# 🚀 Lightweight Browser Load Tester v1.0.0-rc.2
+# 🚀 Lightweight Browser Load Tester v1.0.0-rc.4
 
-## 🎉 Release Candidate 2 - Enhanced with Advanced Features!
+## 🎉 Release Candidate 4 - Authenticated Session Simulation!
 
-We're excited to announce the second iteration of our release candidate! This version builds upon the solid foundation of RC1 with significant enhancements including advanced parameter randomization and intelligent request filtering. This tool provides comprehensive load testing capabilities for streaming applications with full DRM support and enterprise-grade optimization features.
+We're thrilled to announce the fourth iteration of our release candidate! This version introduces groundbreaking localStorage functionality for authenticated session simulation, along with comprehensive randomization support. Building upon the solid foundation of previous releases, RC4 delivers enterprise-grade load testing capabilities with realistic user behavior simulation for streaming applications and web platforms.
 
 ## ✨ Key Features
 
@@ -49,6 +49,20 @@ We're excited to announce the second iteration of our release candidate! This ve
 - **Smart Pattern Matching** - Support for wildcards, regex patterns, and exact matching
 - **Resource Optimization** - 30-60% memory reduction and 20-40% CPU savings
 
+### � **Authenthicated Session Simulation** ⭐ NEW IN RC4
+- **Browser localStorage Pre-population** - Simulate authenticated users with pre-configured localStorage data
+- **Multi-Domain Support** - Set localStorage for multiple domains (main app, API, CDN, etc.)
+- **Randomized User Data** - Each browser instance gets unique user data for realistic testing
+- **Complex JSON Support** - Handle complex application state and user preferences
+- **Authentication Token Management** - Pre-populate JWT tokens, session IDs, and user credentials
+
+### 🎲 **localStorage Randomization** ⭐ NEW IN RC4
+- **Unique User Simulation** - Each browser instance simulates a different authenticated user
+- **Dynamic Data Generation** - Randomize user IDs, session tokens, preferences, and application state
+- **Predefined Arrays** - Built-in arrays for common data types (themes, languages, currencies, etc.)
+- **File-Based Randomization** - Load user data from external files for environment-specific testing
+- **JSON Structure Preservation** - Randomize values within JSON objects while maintaining valid structure
+
 ### 🛠️ **Developer Experience**
 - TypeScript implementation with full type safety
 - Comprehensive CLI interface
@@ -57,14 +71,14 @@ We're excited to announce the second iteration of our release candidate! This ve
 
 ## 📦 Installation
 
-### NPM Package (Release Candidate 2)
+### NPM Package (Release Candidate 4)
 ```bash
 # Install the latest RC version
 npm install -g lightweight-browser-load-tester@rc
 load-tester --help
 
-# Or install specific RC2 version
-npm install -g lightweight-browser-load-tester@1.0.0-rc.2
+# Or install specific RC4 version
+npm install -g lightweight-browser-load-tester@1.0.0-rc.4
 ```
 
 ### Docker Image
@@ -90,6 +104,19 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
    concurrentUsers: 10
    testDuration: 300
    streamingUrl: "https://your-streaming-service.com/stream"
+   
+   # NEW IN RC4: Authenticated session simulation with localStorage
+   localStorage:
+     - domain: "your-streaming-service.com"
+       data:
+         auth_token: "Bearer {{random:uuid}}"
+         user_id: "{{randomFrom:userIds}}"
+         session_id: "sess-{{random:alphanumeric}}"
+         preferences: '{"quality":"{{randomFrom:videoQualities}}","theme":"{{randomFrom:themes}}"}'
+     - domain: "api.your-streaming-service.com"
+       data:
+         api_key: "{{randomFromFile:./data/api-keys.txt}}"
+         rate_limit: "{{random:100-1000}}"
    
    # Advanced request filtering for resource optimization
    streamingOnly: true
@@ -137,6 +164,8 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
 - Configurable test duration and ramp-up time
 - DRM configuration for protected content
 - Resource limits and monitoring
+- **localStorage Pre-population** ⭐ NEW - Multi-domain authenticated session simulation
+- **localStorage Randomization** ⭐ NEW - Unique user data per browser instance
 - **Advanced Request Filtering** - Streaming-only mode with allowed/blocked URL patterns
 - **Dynamic Parameter Randomization** - Advanced request modification with randomization
 - Custom request parameters and headers
@@ -150,22 +179,38 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
 
 ## 🧪 Testing Coverage
 
-- **313 passing tests** with comprehensive coverage
+- **350+ passing tests** with comprehensive coverage
 - Unit tests for all core components
 - Integration tests for end-to-end workflows
-- **Randomization feature tests** - 27 new tests for parameter randomization
+- **Randomization feature tests** - 27 tests for parameter randomization
+- **localStorage feature tests** - 28 new tests for authenticated session simulation
+- **Shared randomization utility tests** - 24 tests for consistent randomization behavior
 - Performance tests for scalability validation
 - Docker and Kubernetes deployment testing
 
 ## 📚 Documentation
 
 - [Configuration Guide](docs/CONFIGURATION_GUIDE.md)
+- **[localStorage Guide](docs/LOCALSTORAGE_GUIDE.md)** ⭐ NEW - Comprehensive guide for authenticated session simulation
 - **[Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md)** - Advanced request filtering and resource optimization
 - **[Parameter Randomization Guide](docs/RANDOMIZATION_GUIDE.md)** - Comprehensive guide for dynamic parameter features
 - [Kubernetes Deployment](docs/KUBERNETES_DEPLOYMENT.md)
 - [API Documentation](API.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Troubleshooting Guide](TROUBLESHOOTING.md)
+
+## 📋 New Examples in RC4
+
+### localStorage Configuration Examples
+- **[authenticated-session.yaml](examples/authenticated-session.yaml)** - Complete authenticated streaming session with randomized user data
+- **[localstorage-examples.yaml](examples/localstorage-examples.yaml)** - Industry-specific localStorage scenarios (e-commerce, SaaS, gaming, education)
+- **[localstorage-randomization.yaml](examples/localstorage-randomization.yaml)** - Advanced randomization patterns for diverse user simulation
+
+### Key Example Features
+- **Multi-Domain localStorage** - Configure data across main app, API, and CDN domains
+- **Randomized Authentication** - Unique tokens, user IDs, and session data per browser instance
+- **Complex JSON Structures** - Randomize values within JSON objects while maintaining validity
+- **Industry-Specific Patterns** - Real-world examples for streaming, e-commerce, SaaS, and gaming applications
 
 ## 🤝 Contributing
 
@@ -183,19 +228,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Special thanks to all contributors and the open-source community for making this project possible.
 
-## 🆕 What's New in RC2
+## 🆕 What's New in RC4
 
 ### Major Enhancements
-- **🎯 Dynamic Parameter Randomization** - Complete implementation with 3 randomization methods
-- **🚫 Advanced Request Filtering** - Intelligent request blocking for resource optimization
-- **📊 Enhanced Testing Coverage** - 46 additional tests (313 total) for new features
-- **📚 Comprehensive Documentation** - New guides for randomization and request filtering
+- **🔐 Authenticated Session Simulation** - Complete localStorage pre-population for realistic user testing
+- **🎲 localStorage Randomization** - Unique user data generation for each browser instance
+- **🌐 Multi-Domain Support** - Configure localStorage across multiple domains (main app, API, CDN)
+- **📊 Enhanced Testing Coverage** - 79 additional tests (350+ total) for localStorage and randomization features
+- **📚 Comprehensive Documentation** - New localStorage guide with industry-specific examples
+
+### New Capabilities
+- **Unique User Simulation** - Each browser instance simulates a different authenticated user
+- **Complex JSON Randomization** - Randomize values within JSON structures while preserving validity
+- **Predefined Data Arrays** - Built-in arrays for themes, languages, currencies, video qualities, etc.
+- **File-Based User Data** - Load randomized user data from external files for environment-specific testing
 
 ### Performance Improvements
-- **30-60% Memory Reduction** through intelligent request filtering
-- **20-40% CPU Savings** with streaming-only mode
-- **File Caching System** for optimized randomization performance
+- **Shared Randomization Utility** - Consistent and optimized randomization across all features
+- **30-60% Memory Reduction** through intelligent request filtering (from RC2)
+- **20-40% CPU Savings** with streaming-only mode (from RC2)
+- **File Caching System** for optimized randomization performance (from RC2)
 
 ---
 
-**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.2
+**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.4
