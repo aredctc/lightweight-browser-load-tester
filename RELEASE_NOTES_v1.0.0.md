@@ -1,8 +1,8 @@
-# 🚀 Lightweight Browser Load Tester v1.0.0-rc.5
+# 🚀 Lightweight Browser Load Tester v1.0.0-rc.6
 
-## 🎉 Release Candidate 5 - Browser Control & DRM Compatibility!
+## 🎉 Release Candidate 6 - Chrome Browser Support & Enhanced DRM!
 
-We're excited to announce the fifth iteration of our release candidate! This version introduces comprehensive browser control capabilities and intelligent DRM compatibility features. Building upon the robust foundation of previous releases, RC5 delivers enhanced debugging capabilities and resolves critical DRM playback issues, making it the most developer-friendly and DRM-compatible version yet.
+We're excited to announce the sixth iteration of our release candidate! This version introduces full Google Chrome browser support alongside Chromium, providing enhanced DRM testing capabilities and fixing critical streaming classification issues. Building upon the robust foundation of previous releases, RC6 delivers true DRM compatibility with Chrome's Widevine support and resolves media segment detection problems, making it the most accurate and DRM-capable version yet.
 
 ## ✨ Key Features
 
@@ -49,19 +49,27 @@ We're excited to announce the fifth iteration of our release candidate! This ver
 - **Smart Pattern Matching** - Support for wildcards, regex patterns, and exact matching
 - **Resource Optimization** - 30-60% memory reduction and 20-40% CPU savings
 
-### 🔧 **Configurable Browser Options** ⭐ NEW IN RC5
+### 🌐 **Chrome Browser Support** ⭐ NEW IN RC6
+- **Dual Browser Support** - Choose between Google Chrome and Chromium browsers (`browserType: chrome|chromium`)
+- **Automatic DRM Selection** - Chrome automatically selected when DRM configuration is detected
+- **Cross-Platform Detection** - Automatic Chrome executable path detection for macOS, Windows, and Linux
+- **Graceful Fallback** - Seamless fallback to Chromium when Chrome is unavailable
+- **Enhanced CLI Options** - New `--browser-type`, `--headless`, `--no-headless` command-line arguments
+
+### 🔐 **Enhanced DRM Compatibility** ⭐ IMPROVED IN RC6
+- **True Widevine Support** - Full Chrome browser integration with hardware-backed DRM capabilities
+- **Automatic Browser Selection** - Chrome automatically chosen for DRM testing scenarios
+- **Hardware Security Features** - Access to Chrome's proprietary DRM modules and security features
+- **DRM-Specific Arguments** - Chrome-optimized arguments (`--enable-widevine-cdm`, `--autoplay-policy=no-user-gesture-required`)
+- **Intelligent Configuration** - Automatic headless mode disabling and DRM optimization
+
+### 🔧 **Configurable Browser Options** ⭐ ENHANCED IN RC6
+- **Browser Type Selection** - Choose Chrome for DRM or Chromium for performance (`browserType: chrome|chromium`)
 - **Headless Mode Control** - Toggle browser visibility for debugging (`headless: true/false`)
-- **Custom Browser Arguments** - Full control over Chromium browser behavior with 50+ supported arguments
+- **Custom Browser Arguments** - Full control over browser behavior with 50+ supported arguments
 - **Debugging Support** - DevTools integration, remote debugging, verbose logging capabilities
 - **Performance Tuning** - Memory limits, CPU optimization, cache management, and resource control
 - **DRM Optimization** - Hardware acceleration, codec support, and content protection settings
-
-### 🤖 **Intelligent DRM Compatibility** ⭐ NEW IN RC5
-- **Automatic DRM Detection** - Smart detection of DRM configuration with automatic browser optimization
-- **Headless Override** - Automatically disables headless mode when DRM is detected (Widevine requires display context)
-- **Hardware Security Handling** - Proper configuration for Widevine L1 hardware-backed security requirements
-- **EME Optimization** - Enhanced Encrypted Media Extensions support for all DRM systems
-- **User Notifications** - Clear warnings when DRM overrides browser configuration
 
 ### � **Authenthicated Session Simulation** ⭐ NEW IN RC4
 - **Browser localStorage Pre-population** - Simulate authenticated users with pre-configured localStorage data
@@ -85,14 +93,14 @@ We're excited to announce the fifth iteration of our release candidate! This ver
 
 ## 📦 Installation
 
-### NPM Package (Release Candidate 5)
+### NPM Package (Release Candidate 6)
 ```bash
 # Install the latest RC version
 npm install -g lightweight-browser-load-tester@rc
 load-tester --help
 
-# Or install specific RC5 version
-npm install -g lightweight-browser-load-tester@1.0.0-rc.5
+# Or install specific RC6 version
+npm install -g lightweight-browser-load-tester@1.0.0-rc.6
 ```
 
 ### Docker Image
@@ -119,13 +127,14 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
    testDuration: 300
    streamingUrl: "https://your-streaming-service.com/stream"
    
-   # NEW IN RC5: Browser control and DRM compatibility
+   # NEW IN RC6: Chrome browser support and enhanced DRM
    browserOptions:
-     headless: false  # Enable for debugging or DRM content
+     browserType: chrome  # Choose 'chrome' for DRM or 'chromium' for performance
+     headless: false      # Enable for debugging or DRM content (auto-disabled for DRM)
      args:
        - "--auto-open-devtools-for-tabs"  # Open DevTools automatically
        - "--start-maximized"              # Start browser maximized
-       - "--enable-logging"               # Enable verbose logging
+       - "--enable-widevine-cdm"          # Enable Widevine DRM support (Chrome only)
    
    # DRM configuration (automatically disables headless mode)
    drmConfig:
@@ -176,7 +185,11 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
 
 3. **Run your test:**
    ```bash
+   # Automatic browser selection based on configuration
    load-tester test -c my-test-config.yaml
+   
+   # Or specify browser type explicitly
+   load-tester test -c my-test-config.yaml --browser-type chrome --no-headless
    ```
 
 ## 📋 What's Included
@@ -208,11 +221,13 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
 
 ## 🧪 Testing Coverage
 
-- **350+ passing tests** with comprehensive coverage
+- **418+ passing tests** with comprehensive coverage (100% success rate)
 - Unit tests for all core components
 - Integration tests for end-to-end workflows
+- **Chrome browser integration tests** - New tests for dual browser support
+- **Streaming type detection tests** - Validation for media segment classification
 - **Randomization feature tests** - 27 tests for parameter randomization
-- **localStorage feature tests** - 28 new tests for authenticated session simulation
+- **localStorage feature tests** - 28 tests for authenticated session simulation
 - **Shared randomization utility tests** - 24 tests for consistent randomization behavior
 - Performance tests for scalability validation
 - Docker and Kubernetes deployment testing
@@ -257,32 +272,33 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Special thanks to all contributors and the open-source community for making this project possible.
 
-## 🆕 What's New in RC5
+## 🆕 What's New in RC6
 
 ### Major Enhancements
-- **🔧 Configurable Browser Options** - Complete control over browser behavior and debugging capabilities
-- **🤖 Intelligent DRM Compatibility** - Automatic DRM detection with smart browser configuration
-- **🔍 Enhanced Debugging Support** - DevTools integration, remote debugging, and comprehensive logging
-- **⚡ DRM Playback Resolution** - Fixed critical Widevine headless mode compatibility issues
-- **📚 Comprehensive Browser Documentation** - Detailed guide with 50+ browser arguments categorized by use case
+- **🌐 Chrome Browser Support** - Full Google Chrome browser integration alongside Chromium
+- **🔐 Enhanced DRM Compatibility** - True Widevine DRM support with Chrome's proprietary modules
+- **🎯 Automatic Browser Selection** - Intelligent Chrome/Chromium selection based on DRM requirements
+- **🔧 Extended CLI Interface** - New browser control options and environment variable support
+- **�  Critical Bug Fixes** - Fixed streaming type detection for accurate media analytics
 
 ### New Capabilities
-- **Headless Mode Control** - Toggle browser visibility with `browserOptions.headless: true/false`
-- **Custom Browser Arguments** - Full support for Chromium arguments across debugging, performance, media, security, and DRM categories
-- **Automatic DRM Detection** - Smart detection of DRM configuration with automatic headless override and DRM-optimized arguments
-- **Hardware Security Handling** - Proper Widevine L1 hardware-backed security requirements management
-- **User Notifications** - Clear warnings when DRM configuration overrides browser settings
+- **Dual Browser Architecture** - Choose between Chrome and Chromium with `browserType: chrome|chromium`
+- **Cross-Platform Chrome Detection** - Automatic Chrome executable path resolution for macOS, Windows, Linux
+- **DRM-Optimized Configuration** - Chrome automatically selected with DRM-specific arguments when DRM is detected
+- **Enhanced CLI Options** - New `--browser-type`, `--headless`, `--no-headless` command-line arguments
+- **Environment Variable Support** - `LOAD_TEST_BROWSER_TYPE` and `LOAD_TEST_HEADLESS` configuration options
 
 ### Critical Fixes
-- **DRM Playback Issues** - Resolved Widevine DRM compatibility problems with headless browsers
-- **Hardware Security Requirements** - Fixed EME (Encrypted Media Extensions) limitations in headless mode
-- **Browser Launch Stability** - Enhanced browser argument handling with conflict resolution
+- **Streaming Type Detection** - Fixed `.ts` files being incorrectly classified as 'manifest' instead of 'segment'
+- **Media Analytics Accuracy** - Resolved Transport Stream segment classification for proper streaming metrics
+- **DRM Testing Reliability** - Chrome browser ensures full Widevine DRM compatibility with hardware security
+- **Browser Selection Logic** - Improved automatic browser selection with graceful fallback mechanisms
 
 ### Developer Experience Improvements
-- **Enhanced Configuration Schema** - New `browserOptions` validation with TypeScript support
-- **Comprehensive Troubleshooting** - Detailed DRM debugging procedures with step-by-step resolution
-- **Smart Configuration Merging** - User arguments intelligently merged with stability defaults
-- **Backward Compatibility** - Existing configurations continue to work seamlessly
+- **Enhanced Configuration Examples** - New Chrome-specific and Chromium-optimized configuration examples
+- **Comprehensive Browser Documentation** - Updated guides with Chrome vs Chromium comparison and selection criteria
+- **Improved Error Handling** - Better Chrome detection with informative fallback messages
+- **Backward Compatibility** - All existing configurations continue to work with automatic browser selection
 
 ## 🆕 What's New in RC4 (Previous Release)
 
@@ -305,6 +321,22 @@ Special thanks to all contributors and the open-source community for making this
 - **20-40% CPU Savings** with streaming-only mode (from RC2)
 - **File Caching System** for optimized randomization performance (from RC2)
 
+## 🆕 What's New in RC5 (Previous Release)
+
+### Major Enhancements
+- **🔧 Configurable Browser Options** - Complete control over browser behavior and debugging capabilities
+- **🤖 Intelligent DRM Compatibility** - Automatic DRM detection with smart browser configuration
+- **🔍 Enhanced Debugging Support** - DevTools integration, remote debugging, and comprehensive logging
+- **⚡ DRM Playback Resolution** - Fixed critical Widevine headless mode compatibility issues
+- **📚 Comprehensive Browser Documentation** - Detailed guide with 50+ browser arguments categorized by use case
+
+### New Capabilities
+- **Headless Mode Control** - Toggle browser visibility with `browserOptions.headless: true/false`
+- **Custom Browser Arguments** - Full support for Chromium arguments across debugging, performance, media, security, and DRM categories
+- **Automatic DRM Detection** - Smart detection of DRM configuration with automatic headless override and DRM-optimized arguments
+- **Hardware Security Handling** - Proper Widevine L1 hardware-backed security requirements management
+- **User Notifications** - Clear warnings when DRM configuration overrides browser settings
+
 ---
 
-**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.5
+**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.6

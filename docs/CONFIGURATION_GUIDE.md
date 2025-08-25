@@ -56,15 +56,52 @@ resourceLimits:
 
 ### Browser Options (Optional)
 
-Configure browser behavior and debugging options:
+Configure browser behavior, type selection, and debugging options:
 
 ```yaml
 browserOptions:
-  headless: true                # Run browsers in headless mode (default: true)
-  args:                        # Additional browser arguments (default: [])
+  browserType: chrome          # Browser type: 'chrome' or 'chromium' (auto-selected based on DRM)
+  headless: false             # Run browsers in headless mode (default: true, auto-disabled for DRM)
+  args:                       # Additional browser arguments (default: [])
     - "--auto-open-devtools-for-tabs"
     - "--start-maximized"
-    - "--enable-logging"
+    - "--enable-widevine-cdm"  # Enable Widevine DRM support (Chrome only)
+```
+
+#### Browser Type Selection
+
+The tool automatically selects the appropriate browser based on your configuration:
+
+- **Chrome**: Used automatically when DRM is configured
+  - Full Google Chrome with Widevine DRM support
+  - Required for DRM testing (Widevine, PlayReady, FairPlay)
+  - Includes proprietary codecs and DRM modules
+  - Automatically runs in non-headless mode for DRM compatibility
+
+- **Chromium**: Used by default for non-DRM testing
+  - Open-source Chromium browser
+  - Lighter weight and faster startup
+  - Supports headless mode for better performance
+  - Ideal for general load testing
+
+#### Automatic DRM Configuration
+
+When DRM is configured, the tool automatically:
+
+```yaml
+# This configuration...
+drmConfig:
+  type: widevine
+  licenseUrl: "https://example.com/license"
+
+# Automatically becomes:
+browserOptions:
+  browserType: chrome    # Auto-selected for DRM
+  headless: false       # Auto-disabled for DRM
+  args:
+    - "--enable-widevine-cdm"
+    - "--autoplay-policy=no-user-gesture-required"
+    - "--disable-features=EncryptedMediaHdcpPolicyCheck"
 ```
 
 #### Common Browser Arguments

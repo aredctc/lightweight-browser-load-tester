@@ -8,7 +8,7 @@ A lightweight load testing tool that uses real browsers to test streaming applic
 
 ## Features
 
-- **Real Browser Testing**: Uses Playwright with Chromium for authentic user behavior simulation
+- **Real Browser Testing**: Uses Playwright with Chrome or Chromium for authentic user behavior simulation
 - **DRM Support**: Built-in support for Widevine, PlayReady, and FairPlay DRM systems
 - **Authenticated Session Simulation**: Pre-populate browser localStorage by domain to simulate authenticated users
 - **Advanced Request Filtering**: Block non-streaming requests to save compute power with fine-grained control
@@ -112,6 +112,10 @@ cd lightweight-browser-load-tester
 
 # Install dependencies
 npm install
+
+# Install browser binaries
+npx playwright install chromium  # For general testing
+npx playwright install chrome    # For DRM testing (recommended)
 
 # Build the project
 npm run build
@@ -230,6 +234,8 @@ export LT_CONCURRENT_USERS=20
 export LT_TEST_DURATION=900
 export LT_STREAMING_URL="https://example.com/stream"
 export LT_DRM_LICENSE_URL="https://example.com/license"
+export LT_BROWSER_TYPE="chrome"
+export LT_HEADLESS="false"
 export LT_PROMETHEUS_ENABLED=true
 export LT_PROMETHEUS_URL="https://prometheus.example.com/api/v1/write"
 ```
@@ -285,9 +291,9 @@ load-tester test --streaming-url https://example-streaming.com/live/channel1 --s
 load-tester test --streaming-url https://example-streaming.com/live/channel1 \
   --blocked-urls "*analytics*,*tracking*,*ads*" --concurrent-users 10
 
-# DRM testing with request filtering
+# DRM testing with Chrome browser (automatically selected for DRM)
 load-tester test --config drm-config.yaml --drm-type widevine --drm-license-url https://example.com/license \
-  --streaming-only --allowed-urls "*.css,*fonts*"
+  --browser-type chrome --no-headless --streaming-only --allowed-urls "*.css,*fonts*"
 
 # With metrics export
 load-tester test --config config.yaml --prometheus-enabled --prometheus-url https://prometheus.example.com/api/v1/write
@@ -347,6 +353,61 @@ try {
   await app.stop();
 }
 ```
+
+## Browser Support
+
+The tool supports both Chrome and Chromium browsers, with automatic selection based on your testing requirements:
+
+### Chrome vs Chromium
+
+- **Chrome**: Full Google Chrome browser with Widevine DRM support
+  - Required for DRM testing (Widevine, PlayReady, FairPlay)
+  - Includes proprietary codecs and DRM modules
+  - Automatically selected when DRM configuration is detected
+  - Runs in non-headless mode for DRM compatibility
+
+- **Chromium**: Open-source Chromium browser
+  - Ideal for general load testing without DRM
+  - Lighter weight and faster startup
+  - Default choice for non-DRM testing
+  - Supports headless mode for better performance
+
+### Automatic Browser Selection
+
+The tool automatically selects the appropriate browser:
+
+```yaml
+# DRM testing - automatically uses Chrome with headless disabled
+drmConfig:
+  type: widevine
+  licenseUrl: "https://example.com/license"
+
+# Non-DRM testing - automatically uses Chromium with headless enabled
+streamingUrl: "https://example.com/regular-stream"
+```
+
+### Manual Browser Configuration
+
+You can explicitly specify the browser type:
+
+```yaml
+browserOptions:
+  browserType: chrome      # or 'chromium'
+  headless: false         # required for DRM testing
+  args:
+    - "--enable-widevine-cdm"
+    - "--autoplay-policy=no-user-gesture-required"
+```
+
+### DRM Requirements
+
+For DRM testing, the tool automatically:
+- Switches to Chrome browser (if available)
+- Disables headless mode
+- Adds DRM-specific browser arguments
+- Warns if Chrome is not available
+
+**Note**: Widevine DRM requires a display context and hardware security features that are only available in full Chrome browser with GUI enabled.
 
 ## DRM Testing
 
@@ -687,6 +748,7 @@ The tool is optimized for minimal resource consumption:
 - **Memory Management**: Automatic cleanup between test runs
 - **CPU Throttling**: Configurable CPU usage limits per instance
 - **Headless Mode**: Runs browsers without GUI by default (automatically disabled for DRM content)
+- **Browser Selection**: Automatic Chrome/Chromium selection based on DRM requirements
 
 ### Configuration Tips
 

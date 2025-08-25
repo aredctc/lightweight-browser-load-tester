@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.6] - 2025-08-25
+
+### Added
+- **Chrome Browser Support** - Full Google Chrome browser integration alongside Chromium
+  - `browserOptions.browserType` - Choose between 'chrome' and 'chromium' browsers
+  - Automatic Chrome selection for DRM testing with Widevine support
+  - Chrome executable path detection for macOS, Windows, and Linux
+  - Graceful fallback to Chromium when Chrome is unavailable
+- **Enhanced DRM Compatibility** - Improved DRM testing with Chrome browser
+  - Chrome browser automatically selected when DRM configuration is detected
+  - Full Widevine DRM support with hardware security features
+  - Chrome-specific DRM arguments (`--enable-widevine-cdm`, `--autoplay-policy=no-user-gesture-required`)
+  - Automatic headless mode disabling for DRM content protection
+- **CLI Browser Options** - Extended command-line interface for browser control
+  - `--browser-type <type>` - Specify Chrome or Chromium browser
+  - `--headless` / `--no-headless` - Control headless mode explicitly
+  - Environment variable support (`LOAD_TEST_BROWSER_TYPE`, `LOAD_TEST_HEADLESS`)
+- **Configuration Examples** - New browser-specific configuration examples
+  - `examples/drm-testing.yaml` - Updated with Chrome browser configuration
+  - `examples/chromium-testing.yaml` - New example for Chromium-based testing
+
+### Changed
+- **Browser Pool Architecture** - Enhanced browser instance management
+  - Automatic browser type selection based on DRM requirements
+  - Chrome executable path resolution with platform detection
+  - Improved browser launch options with type-specific arguments
+  - Enhanced error handling and fallback mechanisms
+- **Configuration Schema** - Extended browser options validation
+  - Added `browserType` field to `BrowserOptions` interface
+  - Updated configuration validation with Chrome/Chromium support
+  - Enhanced TypeScript type definitions for browser selection
+
+### Fixed
+- **Streaming Type Detection** - Critical fix for media segment classification
+  - Fixed `.ts` files being incorrectly classified as 'manifest' instead of 'segment'
+  - Prioritized file extension detection over path component matching
+  - Resolved issue with Transport Stream segments in manifest paths
+  - Improved accuracy of streaming metrics and analytics
+- **DRM Testing Reliability** - Enhanced DRM content testing stability
+  - Chrome browser ensures full Widevine DRM compatibility
+  - Resolved headless mode conflicts with DRM license acquisition
+  - Fixed hardware security requirement issues in DRM testing
+
+### Documentation
+- **Browser Support Guide** - Comprehensive Chrome vs Chromium documentation
+  - Detailed comparison of Chrome and Chromium capabilities
+  - DRM requirements and browser selection guidance
+  - Installation instructions for both browsers
+  - Automatic vs manual browser configuration examples
+- **Updated Configuration Guide** - Enhanced browser configuration documentation
+  - Browser type selection with automatic DRM detection
+  - Chrome-specific configuration examples and best practices
+  - Platform-specific installation and setup instructions
+
+### Technical Details
+- **Browser Detection Logic** - Intelligent browser selection system
+  - Automatic Chrome selection for DRM testing scenarios
+  - Chromium default for regular load testing (better performance)
+  - Platform-specific Chrome executable path detection
+  - Comprehensive error handling and user feedback
+- **Streaming Classification** - Improved media request categorization
+  - File extension-based detection prioritized over path matching
+  - Accurate segment vs manifest classification for analytics
+  - Enhanced streaming metrics accuracy and reporting
+
 ## [1.0.0-rc.5] - 2025-02-08
 
 ### Added

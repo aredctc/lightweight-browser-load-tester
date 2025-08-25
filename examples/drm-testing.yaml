@@ -3,6 +3,7 @@ testDuration: 600
 rampUpTime: 60
 streamingUrl: https://example.com/drm-stream
 
+# DRM configuration - requires Chrome browser for Widevine support
 drmConfig:
   type: widevine
   licenseUrl: https://example.com/license
@@ -10,6 +11,14 @@ drmConfig:
   customHeaders:
     Authorization: Bearer token123
     X-Custom-Header: custom-value
+
+# Browser configuration for DRM testing
+browserOptions:
+  browserType: chrome      # Use Chrome for DRM support (automatically selected when DRM is configured)
+  headless: false         # Headless mode disabled for DRM (automatically disabled when DRM is configured)
+  args:
+    - "--enable-widevine-cdm"
+    - "--autoplay-policy=no-user-gesture-required"
 
 requestParameters:
   - target: header

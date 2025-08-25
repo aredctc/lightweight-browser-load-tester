@@ -518,7 +518,9 @@ describe('RequestInterceptor', () => {
       const segmentUrls = [
         'https://example.com/segment001.ts',
         'https://example.com/chunk.m4s',
-        'https://example.com/media/segment.mp4'
+        'https://example.com/media/segment.mp4',
+        // Test case for .ts files in manifest paths (should be classified as segment, not manifest)
+        'https://videos-cloudfront-usp.jwpsrv.com/68ad7aa0_f2df2fca0158aca1ad40ebcb574cc9cbc7fe41c2/sites/LOPLPiDX/media/yp34SRmf/versions/IFBsp7yL/manifest.ism/manifest-audio_0_PgqMDkXS_m5hixS0Y=112000-video_0_PgqMDkXS_80bhhQzM=936240-5.ts'
       ];
 
       segmentUrls.forEach(url => {

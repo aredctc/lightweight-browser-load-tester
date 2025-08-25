@@ -1,0 +1,46 @@
+concurrentUsers: 15
+testDuration: 300
+rampUpTime: 30
+streamingUrl: https://example.com/regular-stream
+
+# Browser configuration for regular (non-DRM) testing
+browserOptions:
+  browserType: chromium    # Use Chromium for regular testing (default)
+  headless: true          # Headless mode enabled for better performance (default)
+  args:
+    - "--disable-web-security"
+    - "--disable-features=VizDisplayCompositor"
+
+# Request filtering for performance optimization
+streamingOnly: true
+allowedUrls:
+  - "*manifest*"
+  - "*playlist*" 
+  - "*.css"
+  - "*fonts*"
+blockedUrls:
+  - "*analytics*"
+  - "*tracking*"
+  - "*ads*"
+
+requestParameters:
+  - target: header
+    name: User-Agent
+    valueTemplate: LoadTester/1.0 Session-{{sessionId}}
+    scope: per-session
+  - target: query
+    name: clientId
+    valueTemplate: client_{{randomFrom:userIds}}
+    scope: per-session
+
+resourceLimits:
+  maxMemoryPerInstance: 512
+  maxCpuPercentage: 80
+  maxConcurrentInstances: 25
+
+# Optional: Pre-populate localStorage for authenticated sessions
+localStorage:
+  - domain: example.com
+    data:
+      user_preferences: '{"quality":"auto","volume":0.8}'
+      session_token: token_{{randomString:16}}

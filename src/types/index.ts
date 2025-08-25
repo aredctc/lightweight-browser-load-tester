@@ -73,6 +73,7 @@ export interface OpenTelemetryConfiguration {
 export interface BrowserOptions {
   headless?: boolean;
   args?: string[];
+  browserType?: 'chromium' | 'chrome'; // Chrome for DRM support, Chromium for general testing
 }
 
 /**
@@ -222,11 +223,9 @@ export interface BrowserPoolConfig {
   maxInstances: number;
   minInstances: number;
   resourceLimits: ResourceLimits;
-  browserOptions?: {
-    headless?: boolean;
-    args?: string[];
-  };
+  browserOptions?: BrowserOptions;
   localStorage?: LocalStorageEntry[];
+  drmConfig?: DRMConfiguration; // Pass DRM config to determine browser type and headless mode
 }
 
 /**

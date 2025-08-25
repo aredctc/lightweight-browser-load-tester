@@ -1,4 +1,4 @@
-import { Browser, chromium } from 'playwright';
+import { Browser, chromium, BrowserType } from 'playwright';
 import { EventEmitter } from 'events';
 import { BrowserMetrics, BrowserPoolConfig, ManagedBrowserInstance } from '../types';
 import { ErrorRecoveryManager } from './error-recovery';
@@ -55,10 +55,10 @@ export class BrowserPool extends EventEmitter {
         this.availableInstances.delete(availableId);
         instance.isActive = true;
         instance.lastUsed = new Date();
-        
+
         // Record successful acquisition
         this.errorRecovery.recordSuccess(availableId);
-        
+
         this.emit('instanceAcquired', { instanceId: availableId });
         return instance;
       }
@@ -81,7 +81,7 @@ export class BrowserPool extends EventEmitter {
       const onInstanceReleased = () => {
         clearTimeout(timeout);
         this.removeListener('instanceReleased', onInstanceReleased);
-        
+
         // Try to get an available instance directly instead of recursive call
         for (const availableId of this.availableInstances) {
           if (this.errorRecovery.canUseInstance(availableId)) {
@@ -89,16 +89,16 @@ export class BrowserPool extends EventEmitter {
             this.availableInstances.delete(availableId);
             instance.isActive = true;
             instance.lastUsed = new Date();
-            
+
             // Record successful acquisition
             this.errorRecovery.recordSuccess(availableId);
-            
+
             this.emit('instanceAcquired', { instanceId: availableId });
             resolve(instance);
             return;
           }
         }
-        
+
         // If no available instances, wait for another release
         this.on('instanceReleased', onInstanceReleased);
       };
@@ -118,7 +118,7 @@ export class BrowserPool extends EventEmitter {
 
     instance.isActive = false;
     instance.lastUsed = new Date();
-    
+
     // Perform comprehensive memory cleanup
     try {
       await this.performMemoryCleanup(instance);
@@ -144,7 +144,7 @@ export class BrowserPool extends EventEmitter {
     // Include metrics from recently disconnected instances (within last 30 seconds)
     const recentDisconnectedMetrics: BrowserMetrics[] = [];
     const cutoffTime = Date.now() - 30000; // 30 seconds ago
-    
+
     for (const [instanceId, historyEntry] of this.metricsHistory) {
       if (historyEntry.disconnectedAt.getTime() > cutoffTime) {
         recentDisconnectedMetrics.push(historyEntry.metrics);
@@ -175,7 +175,7 @@ export class BrowserPool extends EventEmitter {
    */
   async shutdown(): Promise<void> {
     this.isShuttingDown = true;
-    
+
     if (this.resourceMonitorInterval) {
       clearInterval(this.resourceMonitorInterval);
     }
@@ -183,7 +183,7 @@ export class BrowserPool extends EventEmitter {
     // Shutdown error recovery manager
     this.errorRecovery.shutdown();
 
-    const shutdownPromises = Array.from(this.instances.keys()).map(id => 
+    const shutdownPromises = Array.from(this.instances.keys()).map(id =>
       this.destroyInstance(id)
     );
 
@@ -196,6 +196,40 @@ export class BrowserPool extends EventEmitter {
    */
   getErrorRecoveryStats() {
     return this.errorRecovery.getRecoveryStats();
+  }
+
+  /**
+   * Get the appropriate browser launcher and options based on browser type
+   */
+  private async getBrowserLauncherAndOptions(browserType: 'chromium' | 'chrome'): Promise<{ launcher: BrowserType; executablePath?: string }> {
+    if (browserType === 'chrome') {
+      try {
+        // For Chrome, we use the chromium launcher but specify Chrome's executable path
+        // This allows us to use the full Chrome browser with DRM support
+
+        // Try to find Chrome executable path
+        let chromeExecutablePath: string | undefined;
+
+        // Platform-specific Chrome paths
+        const platform = process.platform;
+        if (platform === 'darwin') {
+          chromeExecutablePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        } else if (platform === 'win32') {
+          chromeExecutablePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+        } else if (platform === 'linux') {
+          chromeExecutablePath = '/usr/bin/google-chrome';
+        }
+
+        return {
+          launcher: chromium,
+          executablePath: chromeExecutablePath
+        };
+      } catch (error) {
+        console.warn('Chrome browser not available, falling back to Chromium. DRM functionality may be limited.');
+        return { launcher: chromium };
+      }
+    }
+    return { launcher: chromium };
   }
 
   /**
@@ -230,9 +264,18 @@ export class BrowserPool extends EventEmitter {
    */
   private async createBrowserInstance(): Promise<ManagedBrowserInstance> {
     const instanceId = `browser-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const browserOptions = {
-      headless: this.config.browserOptions?.headless ?? true,
+
+    // Determine browser type and headless mode based on DRM configuration
+    const isDrmEnabled = !!this.config.drmConfig;
+    const browserType = this.config.browserOptions?.browserType || (isDrmEnabled ? 'chrome' : 'chromium');
+    const headlessMode = isDrmEnabled ? false : (this.config.browserOptions?.headless ?? true);
+
+    // Get the appropriate browser launcher and options
+    const { launcher: browserLauncher, executablePath } = await this.getBrowserLauncherAndOptions(browserType);
+
+    const browserOptions: any = {
+      headless: headlessMode,
+      ...(executablePath && { executablePath }),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -249,7 +292,6 @@ export class BrowserPool extends EventEmitter {
         '--no-first-run',
         '--no-default-browser-check',
         '--disable-gpu',
-        // Removed --single-process as it makes browsers more fragile, not more stable
         // Additional stability flags
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
@@ -263,17 +305,30 @@ export class BrowserPool extends EventEmitter {
         '--enable-automation',
         '--password-store=basic',
         '--use-mock-keychain',
+        // DRM-specific flags for Chrome
+        ...(browserType === 'chrome' ? [
+          '--enable-widevine-cdm',
+          '--disable-features=VizDisplayCompositor'
+        ] : []),
         ...(this.config.browserOptions?.args || [])
       ]
     };
 
     try {
-      const browser = await chromium.launch(browserOptions);
+      const browser = await browserLauncher.launch(browserOptions);
       const context = await browser.newContext({
         viewport: { width: 1280, height: 720 },
         ignoreHTTPSErrors: true
       });
       const page = await context.newPage();
+
+      // Log browser type and mode for debugging
+      this.emit('browserInstanceCreated', {
+        instanceId,
+        browserType,
+        headless: headlessMode,
+        isDrmEnabled
+      });
 
       // Initialize localStorage if configured
       if (this.config.localStorage && this.config.localStorage.length > 0) {
@@ -300,7 +355,7 @@ export class BrowserPool extends EventEmitter {
 
       this.instances.set(instanceId, instance);
       this.availableInstances.add(instanceId);
-      
+
       // Set up error handling
       browser.on('disconnected', () => {
         this.handleBrowserDisconnect(instanceId);
@@ -341,7 +396,7 @@ export class BrowserPool extends EventEmitter {
   private handleBrowserDisconnect(instanceId: string): void {
     const instance = this.instances.get(instanceId);
     const uptime = instance ? (Date.now() - instance.createdAt.getTime()) / 1000 : 0;
-    
+
     // Don't treat disconnections during shutdown as errors
     if (this.isShuttingDown) {
       // This is expected during shutdown - just clean up
@@ -354,16 +409,16 @@ export class BrowserPool extends EventEmitter {
           disconnectedAt: new Date()
         });
       }
-      
+
       this.instances.delete(instanceId);
       this.availableInstances.delete(instanceId);
       this.emit('instanceDisconnected', { instanceId });
       return;
     }
-    
+
     // Only treat as unexpected error if not shutting down
     const error = new Error('Browser instance disconnected unexpectedly');
-    
+
     // Record the failure only for unexpected disconnections
     this.errorRecovery.recordFailure(instanceId, error, {
       event: 'browser-disconnect',
@@ -385,12 +440,12 @@ export class BrowserPool extends EventEmitter {
     // Clean up the disconnected instance
     this.instances.delete(instanceId);
     this.availableInstances.delete(instanceId);
-    
+
     this.emit('instanceDisconnected', { instanceId });
 
     // Attempt automatic restart if conditions are met
     this.attemptInstanceRestart(instanceId, error);
-    
+
     // Ensure we maintain minimum pool size
     this.ensureMinimumPoolSize();
   }
@@ -405,7 +460,7 @@ export class BrowserPool extends EventEmitter {
 
     const currentCount = this.instances.size;
     const needed = this.config.minInstances - currentCount;
-    
+
     if (needed > 0) {
       const promises = [];
       for (let i = 0; i < needed; i++) {
@@ -430,23 +485,23 @@ export class BrowserPool extends EventEmitter {
     try {
       // Create a new instance to replace the failed one
       const newInstance = await this.createBrowserInstance();
-      
+
       // Record successful restart
       this.errorRecovery.recordRestartAttempt(instanceId, true);
-      
-      this.emit('instanceRestarted', { 
-        originalInstanceId: instanceId, 
-        newInstanceId: newInstance.id 
+
+      this.emit('instanceRestarted', {
+        originalInstanceId: instanceId,
+        newInstanceId: newInstance.id
       });
-      
+
     } catch (restartError) {
       // Record failed restart attempt
       this.errorRecovery.recordRestartAttempt(instanceId, false, restartError as Error);
-      
-      this.emit('instanceRestartFailed', { 
-        instanceId, 
-        originalError, 
-        restartError: restartError as Error 
+
+      this.emit('instanceRestartFailed', {
+        instanceId,
+        originalError,
+        restartError: restartError as Error
       });
     }
   }
@@ -470,11 +525,11 @@ export class BrowserPool extends EventEmitter {
         // Get memory usage from browser process
         const memoryInfo = await this.getBrowserMemoryUsage(instance.browser);
         instance.metrics.memoryUsage = memoryInfo;
-        
+
         // CPU usage would require additional system monitoring
         // For now, we'll estimate based on activity
         instance.metrics.cpuUsage = instance.isActive ? 15 : 5; // Rough estimate
-        
+
         // Check if instance exceeds memory limits
         if (memoryInfo > this.config.resourceLimits.maxMemoryPerInstance) {
           this.emit('resourceLimitExceeded', {
@@ -500,12 +555,12 @@ export class BrowserPool extends EventEmitter {
       // system monitoring tools or browser CDP for more accurate metrics
       const contexts = browser.contexts();
       let totalMemory = 50; // Base browser memory estimate in MB
-      
+
       for (const context of contexts) {
         const pages = context.pages();
         totalMemory += pages.length * 20; // Estimate 20MB per page
       }
-      
+
       return totalMemory;
     } catch {
       return 50; // Return base memory instead of 0
@@ -518,12 +573,12 @@ export class BrowserPool extends EventEmitter {
   private async enforceResourceLimits(): Promise<void> {
     const instancesToDestroy: string[] = [];
     const instancesToCleanup: string[] = [];
-    
+
     for (const [instanceId, instance] of this.instances) {
       const { memoryUsage, cpuUsage } = instance.metrics;
-      
+
       if (memoryUsage > this.config.resourceLimits.maxMemoryPerInstance ||
-          cpuUsage > this.config.resourceLimits.maxCpuPercentage) {
+        cpuUsage > this.config.resourceLimits.maxCpuPercentage) {
         if (!instance.isActive) {
           // If memory usage is critically high, destroy the instance
           if (memoryUsage > this.config.resourceLimits.maxMemoryPerInstance * 1.5) {
@@ -538,7 +593,7 @@ export class BrowserPool extends EventEmitter {
             instanceId,
             type: memoryUsage > this.config.resourceLimits.maxMemoryPerInstance ? 'memory' : 'cpu',
             usage: memoryUsage > this.config.resourceLimits.maxMemoryPerInstance ? memoryUsage : cpuUsage,
-            limit: memoryUsage > this.config.resourceLimits.maxMemoryPerInstance ? 
+            limit: memoryUsage > this.config.resourceLimits.maxMemoryPerInstance ?
               this.config.resourceLimits.maxMemoryPerInstance : this.config.resourceLimits.maxCpuPercentage,
             isActive: true
           });
@@ -573,11 +628,11 @@ export class BrowserPool extends EventEmitter {
   private async performMemoryCleanup(instance: ManagedBrowserInstance): Promise<void> {
     // Navigate to blank page to clear current page resources
     await instance.page.goto('about:blank');
-    
+
     // Clear browser context data
     await instance.context.clearCookies();
     await instance.context.clearPermissions();
-    
+
     // Clear storage data
     try {
       await instance.page.evaluate(() => {
@@ -614,7 +669,7 @@ export class BrowserPool extends EventEmitter {
   private async performAggressiveMemoryCleanup(instance: ManagedBrowserInstance): Promise<void> {
     // Perform standard cleanup first
     await this.performMemoryCleanup(instance);
-    
+
     // Force garbage collection if available
     try {
       await instance.page.evaluate(() => {
@@ -646,14 +701,14 @@ export class BrowserPool extends EventEmitter {
     const averageMemory = instances.length > 0 ? totalMemory / instances.length : 0;
     const totalCpu = instances.reduce((sum, instance) => sum + instance.metrics.cpuUsage, 0);
     const averageCpu = instances.length > 0 ? totalCpu / instances.length : 0;
-    
+
     const memoryLimit = this.config.resourceLimits.maxMemoryPerInstance;
     const cpuLimit = this.config.resourceLimits.maxCpuPercentage;
-    
+
     const instancesNearMemoryLimit = instances.filter(
       instance => instance.metrics.memoryUsage > memoryLimit * 0.8
     ).length;
-    
+
     const instancesNearCpuLimit = instances.filter(
       instance => instance.metrics.cpuUsage > cpuLimit * 0.8
     ).length;
@@ -679,11 +734,11 @@ export class BrowserPool extends EventEmitter {
   async cleanupIdleInstances(maxIdleTime: number = 300000): Promise<number> {
     const now = Date.now();
     const instancesToCleanup: string[] = [];
-    
+
     // Find idle instances that can be cleaned up
     for (const [instanceId, instance] of this.instances) {
-      if (!instance.isActive && 
-          (now - instance.lastUsed.getTime()) > maxIdleTime) {
+      if (!instance.isActive &&
+        (now - instance.lastUsed.getTime()) > maxIdleTime) {
         instancesToCleanup.push(instanceId);
       }
     }
@@ -691,7 +746,7 @@ export class BrowserPool extends EventEmitter {
     // Only cleanup instances if we have more than minimum
     const maxToCleanup = Math.max(0, this.instances.size - this.config.minInstances);
     const actualCleanupCount = Math.min(instancesToCleanup.length, maxToCleanup);
-    
+
     // Cleanup idle instances (up to the limit)
     for (let i = 0; i < actualCleanupCount; i++) {
       const instanceId = instancesToCleanup[i];
@@ -712,7 +767,7 @@ export class BrowserPool extends EventEmitter {
 
     // Import randomization utility
     const { RandomizationUtil } = await import('../utils/randomization');
-    
+
     // Create randomization context with browser instance specific data
     const instanceId = `browser-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const randomizationUtil = new RandomizationUtil({
@@ -735,13 +790,13 @@ export class BrowserPool extends EventEmitter {
     for (const localStorageEntry of this.config.localStorage) {
       try {
         // Navigate to the domain to set localStorage
-        const domainUrl = localStorageEntry.domain.startsWith('http') 
-          ? localStorageEntry.domain 
+        const domainUrl = localStorageEntry.domain.startsWith('http')
+          ? localStorageEntry.domain
           : `https://${localStorageEntry.domain}`;
-        
-        await page.goto(domainUrl, { 
+
+        await page.goto(domainUrl, {
           waitUntil: 'domcontentloaded',
-          timeout: 10000 
+          timeout: 10000
         });
 
         // Process localStorage data with randomization
@@ -754,16 +809,16 @@ export class BrowserPool extends EventEmitter {
           });
         }, processedData);
 
-        this.emit('localStorageInitialized', { 
-          domain: localStorageEntry.domain, 
+        this.emit('localStorageInitialized', {
+          domain: localStorageEntry.domain,
           itemCount: Object.keys(processedData).length,
           processedData // Include processed data in event for debugging
         });
 
       } catch (error) {
-        this.emit('localStorageInitializationFailed', { 
-          domain: localStorageEntry.domain, 
-          error 
+        this.emit('localStorageInitializationFailed', {
+          domain: localStorageEntry.domain,
+          error
         });
         // Continue with other domains even if one fails
       }

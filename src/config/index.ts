@@ -94,7 +94,8 @@ const opentelemetryConfigSchema = Joi.object({
 
 const browserOptionsSchema = Joi.object({
   headless: Joi.boolean().optional().default(true),
-  args: Joi.array().items(Joi.string()).optional().default([])
+  args: Joi.array().items(Joi.string()).optional().default([]),
+  browserType: Joi.string().valid('chromium', 'chrome').optional()
 });
 
 const testConfigurationSchema = Joi.object({
@@ -174,7 +175,9 @@ const ENV_MAPPINGS: Record<string, string> = {
   'LOAD_TEST_OTEL_BATCH_TIMEOUT': 'opentelemetry.batchTimeout',
   'LOAD_TEST_OTEL_MAX_EXPORT_BATCH_SIZE': 'opentelemetry.maxExportBatchSize',
   'LOAD_TEST_OTEL_MAX_QUEUE_SIZE': 'opentelemetry.maxQueueSize',
-  'LOAD_TEST_OTEL_EXPORT_TIMEOUT': 'opentelemetry.exportTimeout'
+  'LOAD_TEST_OTEL_EXPORT_TIMEOUT': 'opentelemetry.exportTimeout',
+  'LOAD_TEST_BROWSER_TYPE': 'browserOptions.browserType',
+  'LOAD_TEST_HEADLESS': 'browserOptions.headless'
 };
 
 /**
@@ -340,7 +343,10 @@ export class ConfigurationManager {
       .option('--otel-batch-timeout <ms>', 'OpenTelemetry batch timeout in milliseconds', parseInt)
       .option('--streaming-only', 'Block all non-streaming requests to save CPU/memory')
       .option('--allowed-urls <patterns>', 'Comma-separated URL patterns to always allow (even when streaming-only is enabled)')
-      .option('--blocked-urls <patterns>', 'Comma-separated URL patterns to always block (even if streaming-related)');
+      .option('--blocked-urls <patterns>', 'Comma-separated URL patterns to always block (even if streaming-related)')
+      .option('--browser-type <type>', 'Browser type (chrome|chromium) - Chrome recommended for DRM')
+      .option('--headless', 'Run browsers in headless mode (automatically disabled for DRM)')
+      .option('--no-headless', 'Run browsers with GUI (required for DRM testing)');
 
     program.parse(args, { from: 'user' });
     const options = program.opts();
@@ -401,6 +407,13 @@ export class ConfigurationManager {
     }
     if (options.blockedUrls !== undefined) {
       config.blockedUrls = options.blockedUrls.split(',').map((url: string) => url.trim()).filter((url: string) => url.length > 0);
+    }
+
+    // Handle browser options
+    if (options.browserType !== undefined || options.headless !== undefined) {
+      config.browserOptions = config.browserOptions || {};
+      if (options.browserType !== undefined) config.browserOptions.browserType = options.browserType;
+      if (options.headless !== undefined) config.browserOptions.headless = options.headless;
     }
 
     return config;

@@ -716,13 +716,27 @@ export class RequestInterceptor {
             return undefined;
         }
 
-        // Manifest files
-        if (/\.m3u8(\?|$)|\.mpd(\?|$)|manifest/i.test(url)) {
+        // Check file extensions first (more definitive than path components)
+        
+        // Media segments - check file extensions first
+        if (/\.ts(\?|$)|\.m4s(\?|$)|\.mp4(\?|$)/i.test(url)) {
+            return 'segment';
+        }
+
+        // Manifest files - check file extensions first
+        if (/\.m3u8(\?|$)|\.mpd(\?|$)/i.test(url)) {
             return 'manifest';
         }
 
-        // Media segments
-        if (/\.ts(\?|$)|\.m4s(\?|$)|\.mp4(\?|$)|segment|chunk/i.test(url)) {
+        // Then check path components and keywords
+        
+        // Manifest files - path-based detection
+        if (/manifest/i.test(url)) {
+            return 'manifest';
+        }
+
+        // Media segments - path-based detection
+        if (/segment|chunk/i.test(url)) {
             return 'segment';
         }
 
