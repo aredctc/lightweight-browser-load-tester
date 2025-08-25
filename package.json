@@ -1,6 +1,6 @@
 {
   "name": "lightweight-browser-load-tester",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0-rc.6",
   "description": "A lightweight load testing tool using real browsers for streaming applications with DRM support",
   "main": "dist/index.js",
   "bin": {

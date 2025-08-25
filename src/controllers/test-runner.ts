@@ -118,9 +118,12 @@ export class TestRunner extends EventEmitter {
       minInstances: Math.min(2, config.concurrentUsers),
       resourceLimits: config.resourceLimits,
       localStorage: config.localStorage,
+      drmConfig: config.drmConfig, // Pass DRM config to browser pool
       browserOptions: {
         // Automatically disable headless mode when DRM is configured
         headless: config.drmConfig ? false : (config.browserOptions?.headless ?? true),
+        // Automatically use Chrome for DRM testing, Chromium for regular testing
+        browserType: config.browserOptions?.browserType || (config.drmConfig ? 'chrome' : 'chromium'),
         args: [
           // Default stability and performance args
           '--disable-web-security',
