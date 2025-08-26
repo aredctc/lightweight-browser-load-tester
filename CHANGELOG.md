@@ -7,6 +7,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.7] - 2025-08-26
+
+### Added
+- **Full Chrome Browser Integration** - Complete Google Chrome browser support with automatic DRM detection
+  - Automatic Chrome browser selection when DRM configuration is detected
+  - Cross-platform Chrome executable path detection for macOS, Windows, and Linux
+  - Graceful fallback to Chromium when Chrome is unavailable with appropriate warnings
+  - Chrome-specific browser arguments for optimal DRM performance
+- **True Widevine DRM Support** - Hardware-backed DRM capabilities with Chrome's proprietary modules
+  - `launchPersistentContext` with temporary profiles for secure DRM testing
+  - Chrome DevTools Protocol integration for protected media permissions
+  - Runtime verification of MediaKeySystemAccess and Widevine support
+  - Access to Chrome's hardware-backed security features for L1 Widevine content
+- **Temporary Profile Management** - Secure temporary Chrome profiles for isolated DRM testing
+  - Unique temporary profiles (`/tmp/chrome-drm-profile-*`) for each DRM test instance
+  - Automatic profile cleanup after test completion
+  - Profile isolation for security and test independence
+  - Enhanced DRM debugging and troubleshooting capabilities
+- **DRM Capability Verification** - Automatic Widevine support detection and validation
+  - Runtime verification of browser DRM capabilities on startup
+  - Comprehensive DRM support testing and validation
+  - Enhanced error reporting for DRM configuration issues
+  - DRM-specific event monitoring and logging
+
+### Changed
+- **Browser Pool Architecture** - Enhanced browser instance management with DRM awareness
+  - Intelligent selection between Chrome (DRM) and Chromium (performance)
+  - DRM-aware instance creation with automatic headless mode disabling
+  - Enhanced browser launch options with DRM-specific configurations
+  - Improved browser type detection and fallback mechanisms
+- **DRM Configuration Management** - Automatic DRM detection and browser optimization
+  - Automatic Chrome selection and DRM-specific argument injection
+  - Intelligent headless mode disabling for DRM compatibility
+  - Enhanced DRM permissions setup using Chrome DevTools Protocol
+  - Comprehensive DRM event monitoring and error handling
+- **CLI Interface Enhancement** - Extended command-line options for browser control
+  - New `--browser-type chrome|chromium` option for explicit browser selection
+  - Enhanced `--headless` / `--no-headless` options with DRM awareness
+  - Improved browser type validation and error messaging
+  - Better integration with DRM configuration detection
+
+### Fixed
+- **DRM Testing Reliability** - Resolved DRM compatibility and testing issues
+  - Fixed headless mode conflicts with DRM license acquisition
+  - Resolved hardware security requirement issues in DRM testing
+  - Enhanced Chrome browser detection and configuration
+  - Improved DRM permissions setup and error handling
+- **Browser Launch Stability** - Enhanced browser instance creation and management
+  - Fixed Chrome executable path detection across platforms
+  - Resolved browser launch failures with proper fallback mechanisms
+  - Enhanced error handling for browser configuration issues
+  - Improved browser instance lifecycle management
+- **Temporary Profile Management** - Resolved profile creation and cleanup issues
+  - Fixed temporary profile creation and permissions
+  - Enhanced profile cleanup and resource management
+  - Resolved profile isolation and security issues
+  - Improved profile path handling across platforms
+
+### DRM Features
+- **Chrome-Specific DRM Arguments** - Optimized browser flags for DRM performance
+  - `--enable-widevine-cdm` - Enable Widevine CDM module
+  - `--enable-features=VaapiVideoDecoder` - Hardware video decoding
+  - `--disable-component-update` - Prevent Widevine updates during testing
+  - `--autoplay-policy=no-user-gesture-required` - Auto-play DRM content
+  - Additional DRM-specific flags for optimal compatibility
+- **Protected Media Permissions** - Automatic setup of DRM-required permissions
+  - `protectedMediaIdentifier` permission setup via Chrome DevTools Protocol
+  - Audio and video capture permissions for DRM contexts
+  - Enhanced permission validation and error handling
+  - Comprehensive permission status monitoring and logging
+- **DRM Event System** - Comprehensive DRM-specific event monitoring
+  - `drmPermissionsSetup` - DRM permissions configuration status events
+  - `drmCapabilitiesVerified` - Widevine capability verification results
+  - `browserInstanceCreated` - Browser type and DRM mode logging events
+  - Enhanced DRM debugging and troubleshooting event data
+
+### Testing
+- **DRM Testing Framework** - Comprehensive DRM testing validation
+  - Enhanced DRM configuration testing with Chrome browser integration
+  - Temporary profile creation and cleanup testing
+  - DRM permissions setup and verification testing
+  - Chrome browser detection and fallback testing
+- **Browser Pool DRM Tests** - Extensive DRM-specific browser pool testing
+  - Chrome browser auto-selection testing for DRM configurations
+  - Temporary profile management and cleanup testing
+  - DRM permissions setup and CDP integration testing
+  - Comprehensive DRM capability verification testing
+
+### Documentation
+- **Enhanced DRM Documentation** - Comprehensive DRM testing guide updates
+  - Updated DRM testing guide with Chrome browser requirements
+  - Enhanced configuration examples with Chrome-specific settings
+  - Improved troubleshooting guide for DRM-related issues
+  - Comprehensive DRM setup and verification documentation
+- **Chrome Browser Integration Guide** - New documentation for Chrome vs Chromium
+  - Detailed Chrome browser installation and setup instructions
+  - Chrome vs Chromium comparison for DRM testing scenarios
+  - Platform-specific Chrome configuration and troubleshooting
+  - Enhanced DRM testing best practices and recommendations
+
 ## [1.0.0-rc.6] - 2025-08-25
 
 ### Added

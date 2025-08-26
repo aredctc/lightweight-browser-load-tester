@@ -584,4 +584,232 @@ describe('BrowserPool', () => {
       expect(shutdownSpy).toHaveBeenCalled();
     });
   });
+
+  describe('DRM functionality', () => {
+    let drmConfig: BrowserPoolConfig;
+    let mockCdpSession: any;
+    let mockPersistentContext: any;
+
+    beforeEach(() => {
+      // Setup DRM-specific mocks
+      mockCdpSession = {
+        send: vi.fn().mockResolvedValue(undefined)
+      };
+
+      mockContext.newCDPSession = vi.fn().mockResolvedValue(mockCdpSession);
+
+      // Mock persistent context for DRM
+      mockPersistentContext = {
+        newPage: vi.fn().mockResolvedValue(mockPage),
+        clearCookies: vi.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
+        pages: vi.fn().mockReturnValue([mockPage]),
+        on: vi.fn(),
+        newCDPSession: vi.fn().mockResolvedValue(mockCdpSession)
+      };
+
+      (chromium as any).launchPersistentContext = vi.fn().mockResolvedValue(mockPersistentContext);
+
+      drmConfig = {
+        ...config,
+        drmConfig: {
+          type: 'widevine',
+          licenseUrl: 'https://example.com/license'
+        }
+      };
+    });
+
+    it('should automatically select Chrome browser when DRM is configured', async () => {
+      browserPool = new BrowserPool(drmConfig);
+      
+      await browserPool.initialize();
+      
+      // Verify launchPersistentContext is used for DRM with Chrome-specific arguments
+      expect((chromium as any).launchPersistentContext).toHaveBeenCalledWith(
+        expect.stringMatching(/\/tmp\/chrome-drm-profile-/),
+        expect.objectContaining({
+          args: expect.arrayContaining([
+            '--enable-widevine-cdm',
+            '--disable-features=VizDisplayCompositor'
+          ])
+        })
+      );
+    });
+
+    it('should disable headless mode automatically for DRM', async () => {
+      const headlessDrmConfig = {
+        ...drmConfig,
+        browserOptions: {
+          ...drmConfig.browserOptions,
+          headless: true // This should be overridden
+        }
+      };
+
+      browserPool = new BrowserPool(headlessDrmConfig);
+      
+      await browserPool.initialize();
+      
+      // Verify headless is disabled for DRM in persistent context
+      expect((chromium as any).launchPersistentContext).toHaveBeenCalledWith(
+        expect.stringMatching(/\/tmp\/chrome-drm-profile-/),
+        expect.objectContaining({
+          headless: false
+        })
+      );
+    });
+
+    it('should create temporary Chrome profile for DRM', async () => {
+      browserPool = new BrowserPool(drmConfig);
+      
+      await browserPool.initialize();
+      
+      // Verify launchPersistentContext is called with temporary profile
+      expect((chromium as any).launchPersistentContext).toHaveBeenCalledWith(
+        expect.stringMatching(/\/tmp\/chrome-drm-profile-/),
+        expect.objectContaining({
+          userDataDir: expect.stringMatching(/\/tmp\/chrome-drm-profile-/)
+        })
+      );
+    });
+
+    it('should setup DRM permissions using CDP', async () => {
+      browserPool = new BrowserPool(drmConfig);
+      
+      await browserPool.initialize();
+      
+      // Verify CDP session is created and permissions are set on persistent context
+      expect(mockPersistentContext.newCDPSession).toHaveBeenCalled();
+      expect(mockCdpSession.send).toHaveBeenCalledWith('Browser.grantPermissions', {
+        permissions: [
+          'protectedMediaIdentifier',
+          'audioCapture',
+          'videoCapture',
+          'displayCapture'
+        ]
+      });
+      expect(mockCdpSession.send).toHaveBeenCalledWith('Browser.setPermission', {
+        permission: { name: 'protectedMediaIdentifier' },
+        setting: 'granted'
+      });
+    });
+
+    it('should verify DRM capabilities after setup', async () => {
+      // Mock page.evaluate for DRM verification
+      mockPage.evaluate = vi.fn().mockResolvedValue({
+        widevine: true,
+        error: null
+      });
+
+      browserPool = new BrowserPool(drmConfig);
+      
+      const drmVerifiedSpy = vi.fn();
+      browserPool.on('drmCapabilitiesVerified', drmVerifiedSpy);
+      
+      await browserPool.initialize();
+      
+      // Verify DRM capabilities are checked
+      expect(mockPage.evaluate).toHaveBeenCalled();
+      expect(drmVerifiedSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          drmSupport: { widevine: true, error: null }
+        })
+      );
+    });
+
+    it('should handle DRM permission setup failures gracefully', async () => {
+      // Mock CDP failure
+      mockCdpSession.send = vi.fn().mockRejectedValue(new Error('CDP permission failed'));
+
+      browserPool = new BrowserPool(drmConfig);
+      
+      const drmSetupSpy = vi.fn();
+      browserPool.on('drmPermissionsSetup', drmSetupSpy);
+      
+      await browserPool.initialize();
+      
+      // Verify failure is handled gracefully
+      expect(drmSetupSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          error: 'CDP permission failed'
+        })
+      );
+    });
+
+    it('should handle DRM verification failures gracefully', async () => {
+      // Mock page.evaluate failure
+      mockPage.evaluate = vi.fn().mockRejectedValue(new Error('DRM verification failed'));
+
+      browserPool = new BrowserPool(drmConfig);
+      
+      const drmFailedSpy = vi.fn();
+      browserPool.on('drmVerificationFailed', drmFailedSpy);
+      
+      await browserPool.initialize();
+      
+      // Verify failure is handled gracefully
+      expect(drmFailedSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'DRM verification failed'
+        })
+      );
+    });
+
+    it('should emit DRM-related events', async () => {
+      mockPage.evaluate = vi.fn().mockResolvedValue({
+        widevine: true,
+        error: null
+      });
+
+      browserPool = new BrowserPool(drmConfig);
+      
+      const drmSetupSpy = vi.fn();
+      const drmVerifiedSpy = vi.fn();
+      
+      browserPool.on('drmPermissionsSetup', drmSetupSpy);
+      browserPool.on('drmCapabilitiesVerified', drmVerifiedSpy);
+      
+      await browserPool.initialize();
+      
+      // Verify both DRM events are emitted
+      expect(drmSetupSpy).toHaveBeenCalled();
+      expect(drmVerifiedSpy).toHaveBeenCalled();
+    });
+
+    it('should use DRM-specific browser arguments', async () => {
+      browserPool = new BrowserPool(drmConfig);
+      
+      await browserPool.initialize();
+      
+      // Verify comprehensive DRM arguments are used in persistent context
+      expect((chromium as any).launchPersistentContext).toHaveBeenCalledWith(
+        expect.stringMatching(/\/tmp\/chrome-drm-profile-/),
+        expect.objectContaining({
+          args: expect.arrayContaining([
+            '--enable-widevine-cdm',
+            '--enable-features=VaapiVideoDecoder',
+            '--disable-component-update',
+            '--use-fake-ui-for-media-stream',
+            '--disable-background-media-suspend',
+            '--enable-experimental-web-platform-features'
+          ])
+        })
+      );
+    });
+
+    it('should clean up DRM profiles on shutdown', async () => {
+      browserPool = new BrowserPool(drmConfig);
+      
+      // Spy on the cleanup methods
+      const cleanupDrmProfileSpy = vi.spyOn(browserPool as any, 'cleanupDrmProfile');
+      const cleanupAllDrmProfilesSpy = vi.spyOn(browserPool as any, 'cleanupAllDrmProfiles');
+      
+      await browserPool.initialize();
+      await browserPool.shutdown();
+      
+      // Verify cleanup methods are called
+      expect(cleanupDrmProfileSpy).toHaveBeenCalled();
+      expect(cleanupAllDrmProfilesSpy).toHaveBeenCalled();
+    });
+  });
 });

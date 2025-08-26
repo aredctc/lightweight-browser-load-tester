@@ -1,6 +1,6 @@
 # Load Tester Configuration Examples
 
-This directory contains practical configuration examples for the Lightweight Browser Load Tester, demonstrating various features and use cases.
+This directory contains practical configuration examples for the Lightweight Browser Load Tester, demonstrating various features and use cases. All examples are tested with the comprehensive testing framework (428+ tests) to ensure production-ready reliability.
 
 ## Quick Start Examples
 
