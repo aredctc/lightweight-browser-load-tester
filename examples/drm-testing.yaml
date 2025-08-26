@@ -3,6 +3,13 @@ testDuration: 600
 rampUpTime: 60
 streamingUrl: https://example.com/drm-stream
 
+# IMPORTANT: DRM Testing Requirements
+# 1. Chrome browser must be installed (not just Chromium)
+# 2. Chrome must have "Protected content" permission enabled
+# 3. Widevine CDM must be enabled in Chrome settings
+# 4. For headless testing, use headless: false (automatically set when DRM is configured)
+# 5. Some streaming services may require additional authentication headers
+
 # DRM configuration - requires Chrome browser for Widevine support
 drmConfig:
   type: widevine
@@ -19,6 +26,11 @@ browserOptions:
   args:
     - "--enable-widevine-cdm"
     - "--autoplay-policy=no-user-gesture-required"
+    - "--enable-features=VaapiVideoDecoder"
+    - "--disable-component-update"
+    - "--allow-running-insecure-content"
+    - "--enable-logging=stderr"
+    - "--log-level=0"
 
 requestParameters:
   - target: header

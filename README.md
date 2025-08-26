@@ -10,6 +10,7 @@ A lightweight load testing tool that uses real browsers to test streaming applic
 
 - **Real Browser Testing**: Uses Playwright with Chrome or Chromium for authentic user behavior simulation
 - **DRM Support**: Built-in support for Widevine, PlayReady, and FairPlay DRM systems
+- **Production-Ready Reliability**: Enterprise-grade error recovery and browser pool management
 - **Authenticated Session Simulation**: Pre-populate browser localStorage by domain to simulate authenticated users
 - **Advanced Request Filtering**: Block non-streaming requests to save compute power with fine-grained control
 - **Resource Efficient**: Optimized for minimal memory and CPU usage per browser instance
@@ -783,6 +784,8 @@ htop  # or similar system monitor
 ## Documentation
 
 - **[Configuration Guide](docs/CONFIGURATION_GUIDE.md)**: Detailed configuration options and examples
+- **[Testing Framework Guide](docs/TESTING_FRAMEWORK_GUIDE.md)**: Comprehensive guide for production-ready testing and reliability
+- **[DRM Testing Guide](docs/DRM_TESTING_GUIDE.md)**: Complete guide for testing DRM-protected streaming content
 - **[Request Ingestion Guide](docs/REQUEST_INGESTION_GUIDE.md)**: Comprehensive guide for parameter injection and request modification
 - **[Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md)**: Complete guide to request filtering, streaming-only mode, and URL patterns
 - **[Parameter Randomization Guide](docs/RANDOMIZATION_GUIDE.md)**: Advanced guide for dynamic parameter generation and randomization

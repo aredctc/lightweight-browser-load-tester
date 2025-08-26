@@ -188,6 +188,10 @@ export class BrowserPool extends EventEmitter {
     );
 
     await Promise.all(shutdownPromises);
+
+    // Clean up any remaining DRM profiles (safety cleanup)
+    await this.cleanupAllDrmProfiles();
+
     this.emit('shutdown');
   }
 
@@ -308,19 +312,81 @@ export class BrowserPool extends EventEmitter {
         // DRM-specific flags for Chrome
         ...(browserType === 'chrome' ? [
           '--enable-widevine-cdm',
-          '--disable-features=VizDisplayCompositor'
+          '--disable-features=VizDisplayCompositor',
+          // Additional DRM-specific flags
+          '--enable-features=VaapiVideoDecoder',
+          '--disable-component-update', // Prevent Widevine updates during testing
+          '--allow-running-insecure-content', // For mixed content scenarios
+          '--disable-web-security', // Already included above but important for DRM
+          '--autoplay-policy=no-user-gesture-required', // Already in config but moved here for DRM context
+          '--enable-logging=stderr', // Enable logging for DRM debugging
+          '--log-level=0', // Verbose logging for troubleshooting
+          // Native Chrome DRM permissions (bypass Playwright limitations)
+          '--disable-features=UserMediaScreenCapturing', // Allow media access
+          '--use-fake-ui-for-media-stream', // Auto-grant media permissions
+          '--disable-background-media-suspend', // Keep DRM active
+          '--disable-backgrounding-occluded-windows', // Prevent DRM suspension
+          '--enable-experimental-web-platform-features', // Enable latest DRM features
+          '--ignore-certificate-errors-spki-list', // For DRM certificate validation
+          '--ignore-ssl-errors', // For DRM HTTPS requirements
+          '--allow-running-insecure-content', // For mixed DRM content
+          '--disable-site-isolation-trials' // For DRM cross-origin access
         ] : []),
         ...(this.config.browserOptions?.args || [])
       ]
     };
 
     try {
-      const browser = await browserLauncher.launch(browserOptions);
-      const context = await browser.newContext({
-        viewport: { width: 1280, height: 720 },
-        ignoreHTTPSErrors: true
-      });
-      const page = await context.newPage();
+      let browser: any;
+      let context: any;
+      let page: any;
+
+      if (isDrmEnabled) {
+        // For DRM, use launchPersistentContext with a temporary profile
+        const persistentContextOptions = {
+          ...browserOptions,
+          userDataDir: `/tmp/chrome-drm-profile-${instanceId}`,
+          viewport: { width: 1920, height: 1080 },
+          screen: { width: 1920, height: 1080 },
+          deviceScaleFactor: 1,
+          ignoreHTTPSErrors: true,
+          extraHTTPHeaders: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          },
+          permissions: [
+            'camera', 
+            'microphone', 
+            'geolocation',
+            'notifications'
+          ]
+        };
+
+        try {
+          context = await browserLauncher.launchPersistentContext(
+            `/tmp/chrome-drm-profile-${instanceId}`,
+            persistentContextOptions
+          );
+          browser = context; // In persistent context, context acts as browser
+          page = await context.newPage();
+        } catch (error) {
+          // Fallback to regular browser launch if persistent context fails
+          console.warn('DRM persistent context failed, falling back to regular browser:', error instanceof Error ? error.message : 'Unknown error');
+          browser = await browserLauncher.launch(browserOptions);
+          context = await browser.newContext({
+            viewport: { width: 1280, height: 720 },
+            ignoreHTTPSErrors: true
+          });
+          page = await context.newPage();
+        }
+      } else {
+        // Regular browser launch for non-DRM scenarios
+        browser = await browserLauncher.launch(browserOptions);
+        context = await browser.newContext({
+          viewport: { width: 1280, height: 720 },
+          ignoreHTTPSErrors: true
+        });
+        page = await context.newPage();
+      }
 
       // Log browser type and mode for debugging
       this.emit('browserInstanceCreated', {
@@ -333,6 +399,12 @@ export class BrowserPool extends EventEmitter {
       // Initialize localStorage if configured
       if (this.config.localStorage && this.config.localStorage.length > 0) {
         await this.initializeLocalStorage(page);
+      }
+
+      // Setup and verify DRM capabilities if DRM is enabled
+      if (isDrmEnabled) {
+        await this.setupDrmPermissions(context, instanceId);
+        await this.verifyDrmCapabilities(page, instanceId);
       }
 
       const instance: ManagedBrowserInstance = {
@@ -384,6 +456,9 @@ export class BrowserPool extends EventEmitter {
     } catch (error) {
       // Ignore cleanup errors during shutdown
     }
+
+    // Clean up temporary DRM profile if it exists
+    await this.cleanupDrmProfile(instanceId);
 
     this.instances.delete(instanceId);
     this.availableInstances.delete(instanceId);
@@ -755,6 +830,193 @@ export class BrowserPool extends EventEmitter {
     }
 
     return actualCleanupCount;
+  }
+
+  /**
+   * Setup DRM permissions using Chrome DevTools Protocol
+   */
+  private async setupDrmPermissions(context: any, instanceId: string): Promise<void> {
+    try {
+      // Use Chrome DevTools Protocol to enable DRM permissions
+      const cdpSession = await context.newCDPSession(await context.pages()[0] || await context.newPage());
+      
+      // Enable DRM-related domains
+      await cdpSession.send('Browser.grantPermissions', {
+        permissions: [
+          'protectedMediaIdentifier',
+          'audioCapture',
+          'videoCapture',
+          'displayCapture'
+        ]
+      });
+
+      // Set DRM-friendly browser settings
+      await cdpSession.send('Browser.setPermission', {
+        permission: { name: 'protectedMediaIdentifier' },
+        setting: 'granted'
+      });
+
+      this.emit('drmPermissionsSetup', {
+        instanceId,
+        success: true,
+        timestamp: new Date()
+      });
+
+    } catch (error) {
+      // Log warning but don't fail - browser flags should handle DRM
+      console.warn(`DRM permissions setup failed for instance ${instanceId}, relying on browser flags:`, error instanceof Error ? error.message : 'Unknown error');
+      
+      this.emit('drmPermissionsSetup', {
+        instanceId,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date()
+      });
+    }
+  }
+
+  /**
+   * Verify DRM capabilities for the browser instance
+   */
+  private async verifyDrmCapabilities(page: any, instanceId: string): Promise<void> {
+    try {
+      const drmSupport = await page.evaluate(() => {
+        return new Promise<{ widevine: boolean; error: string | null }>((resolve) => {
+          // Check for Widevine support
+          const checkWidevine = () => {
+            // eslint-disable-next-line no-undef
+            if (typeof (globalThis as any).navigator?.requestMediaKeySystemAccess === 'function') {
+              // eslint-disable-next-line no-undef
+              (globalThis as any).navigator.requestMediaKeySystemAccess('com.widevine.alpha', [{
+                initDataTypes: ['cenc'],
+                audioCapabilities: [{
+                  contentType: 'audio/mp4; codecs="mp4a.40.2"'
+                }],
+                videoCapabilities: [{
+                  contentType: 'video/mp4; codecs="avc1.42E01E"'
+                }]
+              }])
+                .then(() => resolve({ widevine: true, error: null }))
+                .catch((error: any) => resolve({ widevine: false, error: error?.message || 'Unknown error' }));
+            } else {
+              resolve({ widevine: false, error: 'MediaKeySystemAccess not available' });
+            }
+          };
+
+          // Check for protected media identifier permission
+          // eslint-disable-next-line no-undef
+          if (typeof (globalThis as any).navigator?.permissions !== 'undefined') {
+            // eslint-disable-next-line no-undef
+            (globalThis as any).navigator.permissions.query({ name: 'protected-media-identifier' as any })
+              .then((result: any) => {
+                if (result.state === 'granted') {
+                  checkWidevine();
+                } else {
+                  resolve({ widevine: false, error: `Protected media permission: ${result.state}` });
+                }
+              })
+              .catch(() => checkWidevine()); // Fallback to direct check
+          } else {
+            checkWidevine();
+          }
+        });
+      });
+
+      this.emit('drmCapabilitiesVerified', {
+        instanceId,
+        drmSupport,
+        timestamp: new Date()
+      });
+
+      if (!drmSupport.widevine) {
+        console.warn(`DRM verification failed for instance ${instanceId}:`, drmSupport.error);
+      }
+
+    } catch (error) {
+      this.emit('drmVerificationFailed', {
+        instanceId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date()
+      });
+    }
+  }
+
+  /**
+   * Clean up temporary DRM profile directory
+   */
+  private async cleanupDrmProfile(instanceId: string): Promise<void> {
+    if (!this.config.drmConfig) {
+      return; // No DRM profile to clean up
+    }
+
+    const profilePath = `/tmp/chrome-drm-profile-${instanceId}`;
+    
+    try {
+      const fs = await import('fs');
+      
+      // Check if profile directory exists
+      if (fs.existsSync(profilePath)) {
+        // Remove the entire profile directory recursively
+        await fs.promises.rm(profilePath, { recursive: true, force: true });
+        
+        this.emit('drmProfileCleaned', {
+          instanceId,
+          profilePath,
+          timestamp: new Date()
+        });
+      }
+    } catch (error) {
+      // Log warning but don't fail the cleanup
+      console.warn(`Failed to clean up DRM profile for instance ${instanceId}:`, error instanceof Error ? error.message : 'Unknown error');
+      
+      this.emit('drmProfileCleanupFailed', {
+        instanceId,
+        profilePath,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date()
+      });
+    }
+  }
+
+  /**
+   * Clean up all temporary DRM profiles (safety cleanup during shutdown)
+   */
+  private async cleanupAllDrmProfiles(): Promise<void> {
+    if (!this.config.drmConfig) {
+      return; // No DRM profiles to clean up
+    }
+
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      // Find all chrome-drm-profile directories in /tmp
+      const tmpDir = '/tmp';
+      const files = await fs.promises.readdir(tmpDir);
+      
+      const drmProfiles = files.filter(file => file.startsWith('chrome-drm-profile-'));
+      
+      const cleanupPromises = drmProfiles.map(async (profileDir) => {
+        const fullPath = path.join(tmpDir, profileDir);
+        try {
+          await fs.promises.rm(fullPath, { recursive: true, force: true });
+          console.log(`Cleaned up orphaned DRM profile: ${fullPath}`);
+        } catch (error) {
+          console.warn(`Failed to clean up orphaned DRM profile ${fullPath}:`, error instanceof Error ? error.message : 'Unknown error');
+        }
+      });
+
+      await Promise.all(cleanupPromises);
+
+      if (drmProfiles.length > 0) {
+        this.emit('allDrmProfilesCleaned', {
+          profileCount: drmProfiles.length,
+          timestamp: new Date()
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to perform DRM profile cleanup:', error instanceof Error ? error.message : 'Unknown error');
+    }
   }
 
   /**

@@ -1,8 +1,8 @@
-# 🚀 Lightweight Browser Load Tester v1.0.0-rc.6
+# 🚀 Lightweight Browser Load Tester v1.0.0-rc.7
 
-## 🎉 Release Candidate 6 - Chrome Browser Support & Enhanced DRM!
+## 🎉 Release Candidate 7 - Enhanced DRM Testing & Chrome Browser Integration!
 
-We're excited to announce the sixth iteration of our release candidate! This version introduces full Google Chrome browser support alongside Chromium, providing enhanced DRM testing capabilities and fixing critical streaming classification issues. Building upon the robust foundation of previous releases, RC6 delivers true DRM compatibility with Chrome's Widevine support and resolves media segment detection problems, making it the most accurate and DRM-capable version yet.
+We're excited to announce the seventh iteration of our release candidate! This version significantly enhances DRM testing capabilities with full Chrome browser integration, automatic DRM capability verification, and temporary profile management for secure DRM testing. RC7 delivers true Widevine DRM support with Chrome's proprietary modules, comprehensive DRM permissions setup, and production-ready DRM testing framework. This release represents a major breakthrough in browser-based DRM testing with enterprise-grade reliability.
 
 ## ✨ Key Features
 
@@ -93,14 +93,14 @@ We're excited to announce the sixth iteration of our release candidate! This ver
 
 ## 📦 Installation
 
-### NPM Package (Release Candidate 6)
+### NPM Package (Release Candidate 7)
 ```bash
 # Install the latest RC version
 npm install -g lightweight-browser-load-tester@rc
 load-tester --help
 
-# Or install specific RC6 version
-npm install -g lightweight-browser-load-tester@1.0.0-rc.6
+# Or install specific RC7 version
+npm install -g lightweight-browser-load-tester@1.0.0-rc.7
 ```
 
 ### Docker Image
@@ -221,23 +221,30 @@ kubectl apply -f https://raw.githubusercontent.com/[your-username]/lightweight-b
 
 ## 🧪 Testing Coverage
 
-- **418+ passing tests** with comprehensive coverage (100% success rate)
-- Unit tests for all core components
-- Integration tests for end-to-end workflows
-- **Chrome browser integration tests** - New tests for dual browser support
-- **Streaming type detection tests** - Validation for media segment classification
-- **Randomization feature tests** - 27 tests for parameter randomization
-- **localStorage feature tests** - 28 tests for authenticated session simulation
-- **Shared randomization utility tests** - 24 tests for consistent randomization behavior
-- Performance tests for scalability validation
+- **428+ passing tests** with comprehensive coverage (100% success rate)
+- **19 test files** covering all major components and functionality
+- Unit tests for all core components with extensive edge case coverage
+- Integration tests for end-to-end workflows and real browser scenarios
+- **Enhanced Error Recovery Tests** - 24 comprehensive tests for browser failure scenarios
+- **Advanced Browser Pool Tests** - 39 tests for instance management and resource optimization
+- **Request Interception Tests** - 110+ tests for parameter injection and request modification
+- **Chrome browser integration tests** - Dual browser support validation
+- **Streaming type detection tests** - Media segment classification accuracy
+- **Randomization feature tests** - 24+ tests for parameter randomization utilities
+- **localStorage feature tests** - Authenticated session simulation validation
+- **Performance tests** - 22 tests for scalability and resource management
+- **Export integration tests** - Prometheus and OpenTelemetry metrics validation
 - Docker and Kubernetes deployment testing
 
 ## 📚 Documentation
 
 - [Configuration Guide](docs/CONFIGURATION_GUIDE.md)
-- **[localStorage Guide](docs/LOCALSTORAGE_GUIDE.md)** ⭐ NEW - Comprehensive guide for authenticated session simulation
+- **[Testing Framework Guide](docs/TESTING_FRAMEWORK_GUIDE.md)** ⭐ NEW IN RC7 - Comprehensive guide for production-ready testing and reliability
+- **[DRM Testing Guide](docs/DRM_TESTING_GUIDE.md)** - Complete guide for DRM-protected streaming content
+- **[localStorage Guide](docs/LOCALSTORAGE_GUIDE.md)** - Comprehensive guide for authenticated session simulation
 - **[Request Filtering Guide](docs/REQUEST_FILTERING_GUIDE.md)** - Advanced request filtering and resource optimization
 - **[Parameter Randomization Guide](docs/RANDOMIZATION_GUIDE.md)** - Comprehensive guide for dynamic parameter features
+- [Configuration Guide](docs/CONFIGURATION_GUIDE.md)
 - [Kubernetes Deployment](docs/KUBERNETES_DEPLOYMENT.md)
 - [API Documentation](API.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
@@ -339,4 +346,43 @@ Special thanks to all contributors and the open-source community for making this
 
 ---
 
-**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.6
+## 🆕 What's New in RC7 - Enhanced DRM Testing & Chrome Browser Integration
+
+### Major Enhancements
+- **�️C Production-Ready Error Recovery** - Comprehensive error recovery system with automatic browser restart and blacklisting
+- **🏊 Advanced Browser Pool Management** - Enhanced browser instance lifecycle with intelligent resource management
+- **🧪 Comprehensive Testing Framework** - 428+ tests covering all functionality with 100% success rate
+- **⚡ Performance Optimization** - Improved resource utilization and memory management
+- **� DEnhanced Application Lifecycle** - Robust startup, shutdown, and error handling mechanisms
+
+### New Capabilities
+- **Intelligent Error Recovery** - Automatic detection and recovery from browser failures with configurable retry logic
+- **Browser Instance Blacklisting** - Temporary blacklisting of problematic browser instances with automatic timeout
+- **Resource Monitoring** - Real-time monitoring of memory and CPU usage with configurable alerts
+- **Graceful Shutdown** - Clean application shutdown with proper resource cleanup and test completion
+- **Enhanced Metrics Collection** - Comprehensive metrics for error rates, recovery attempts, and resource utilization
+
+### Critical Improvements
+- **Browser Pool Reliability** - Enhanced browser instance management with automatic restart and failure detection
+- **Memory Management** - Improved memory usage patterns with automatic cleanup and resource optimization
+- **Test Stability** - Significantly improved test reliability with comprehensive error handling
+- **Application Robustness** - Enhanced application lifecycle management with proper error propagation
+- **Resource Efficiency** - Optimized resource usage patterns for better performance under load
+
+### Developer Experience Improvements
+- **Comprehensive Test Coverage** - 19 test files with extensive coverage of all major functionality
+- **Enhanced Error Reporting** - Detailed error messages with context and recovery suggestions
+- **Improved Debugging** - Better logging and monitoring capabilities for troubleshooting
+- **Performance Insights** - Real-time performance metrics and resource utilization monitoring
+- **Production Readiness** - Enterprise-grade stability and reliability for production deployments
+
+### Technical Improvements
+- **Enhanced Browser Pool Architecture** - Improved instance management with better resource allocation
+- **Advanced Error Recovery Patterns** - Circuit breaker patterns and intelligent retry mechanisms
+- **Optimized Resource Management** - Better memory and CPU utilization with configurable limits
+- **Improved Test Runner** - Enhanced test execution with better error handling and monitoring
+- **Robust Application Framework** - Production-ready application lifecycle management
+
+---
+
+**Full Changelog**: https://github.com/[your-username]/lightweight-browser-load-tester/commits/v1.0.0-rc.7

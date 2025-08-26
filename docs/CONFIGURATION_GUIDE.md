@@ -6,6 +6,7 @@ This guide provides detailed information about configuring the Lightweight Brows
 
 - [Configuration File Formats](#configuration-file-formats)
 - [Basic Configuration](#basic-configuration)
+- [Error Recovery Configuration](#error-recovery-configuration)
 - [DRM Testing Configuration](#drm-testing-configuration)
 - [Parameter Injection](#parameter-injection)
 - [Resource Management](#resource-management)
@@ -197,6 +198,104 @@ The load tester automatically includes these stability and performance arguments
 - `--no-default-browser-check` - Skips default browser check
 
 Your custom arguments are added to these defaults, not replacing them.
+
+## Error Recovery Configuration
+
+The tool includes a comprehensive error recovery system that automatically handles browser failures and resource issues. You can configure the error recovery behavior to match your testing requirements.
+
+### Basic Error Recovery Settings
+
+```yaml
+# Error recovery is enabled by default with sensible defaults
+# These settings are automatically configured but can be customized
+
+errorRecovery:
+  maxRestartAttempts: 3           # Maximum restart attempts per browser instance
+  restartDelay: 5000             # Delay between restart attempts (ms)
+  blacklistTimeout: 30000        # Time to blacklist failed instances (ms)
+  maxConsecutiveFailures: 5      # Max failures before blacklisting
+  cleanupInterval: 300000        # Cleanup interval for old tracking data (ms)
+```
+
+### Advanced Error Recovery Configuration
+
+```yaml
+errorRecovery:
+  # Restart behavior
+  maxRestartAttempts: 5           # Increase for more resilient testing
+  restartDelay: 10000            # Longer delay for unstable environments
+  exponentialBackoff: true       # Use exponential backoff for retries
+  
+  # Blacklisting behavior
+  blacklistTimeout: 60000        # Longer blacklist timeout
+  maxConsecutiveFailures: 3      # More aggressive blacklisting
+  
+  # Monitoring and cleanup
+  cleanupInterval: 600000        # Less frequent cleanup for performance
+  enableDetailedLogging: true    # Enable detailed error recovery logging
+  
+  # Circuit breaker settings
+  circuitBreakerThreshold: 10    # Failures before circuit breaker opens
+  circuitBreakerTimeout: 120000  # Circuit breaker reset timeout
+```
+
+### Error Recovery Best Practices
+
+**For Stable Environments:**
+```yaml
+errorRecovery:
+  maxRestartAttempts: 2
+  restartDelay: 3000
+  blacklistTimeout: 15000
+  maxConsecutiveFailures: 3
+```
+
+**For Unstable Environments:**
+```yaml
+errorRecovery:
+  maxRestartAttempts: 5
+  restartDelay: 10000
+  exponentialBackoff: true
+  blacklistTimeout: 60000
+  maxConsecutiveFailures: 5
+  enableDetailedLogging: true
+```
+
+**For High-Performance Testing:**
+```yaml
+errorRecovery:
+  maxRestartAttempts: 1
+  restartDelay: 1000
+  blacklistTimeout: 5000
+  maxConsecutiveFailures: 2
+  cleanupInterval: 60000
+```
+
+### Error Recovery Events
+
+The error recovery system emits events that you can monitor:
+
+- `browser-failure`: Browser instance failure detected
+- `restart-attempt`: Browser restart attempt initiated
+- `restart-success`: Browser successfully restarted
+- `restart-failed`: Browser restart failed
+- `instance-blacklisted`: Browser instance blacklisted
+- `instance-recovered`: Blacklisted instance recovered
+
+### Monitoring Error Recovery
+
+Monitor error recovery effectiveness through metrics:
+
+```yaml
+# Error recovery metrics are automatically collected
+prometheus:
+  enabled: true
+  # Metrics include:
+  # - error_recovery_attempts_total
+  # - error_recovery_success_rate
+  # - blacklisted_instances_total
+  # - restart_attempts_total
+```
 
 ## DRM Testing Configuration
 
