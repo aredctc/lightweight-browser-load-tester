@@ -7,6 +7,7 @@ This directory contains practical configuration examples for the Lightweight Bro
 ### Basic Load Testing
 - **[basic-load-test.json](basic-load-test.json)** - Simple load testing configuration
 - **[drm-testing.yaml](drm-testing.yaml)** - DRM testing with Widevine configuration
+- **[drm-production-streaming.yaml](drm-production-streaming.yaml)** - Production DRM testing optimized for streaming services (fixes "browser needs updating" issues)
 
 ### Parameter Injection Examples
 - **[selective-parameters.yaml](selective-parameters.yaml)** - URL-based selective parameter targeting (RECOMMENDED)

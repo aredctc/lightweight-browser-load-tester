@@ -358,6 +358,43 @@ rampUpTime: 300              # Slower ramp-up (5 minutes)
 
 ## DRM Testing Issues
 
+### "Browser Needs Updating" Error from Streaming Services
+
+**Problem:** Streaming services display "browser needs updating" or "unsupported browser" messages.
+
+**Symptoms:**
+- Error messages about browser compatibility
+- Content plays in regular Chrome but not in load tester
+- Streaming service blocks playback due to browser detection
+
+**Root Cause:** Temporary Chrome profiles and DRM-specific flags may cause browser fingerprinting issues.
+
+**Solution:**
+```yaml
+# ✅ Use regular Chrome profile instead of temporary profile
+drmConfig:
+  type: widevine
+  licenseUrl: "https://your-license-server.com/license"
+  useTemporaryProfile: false  # KEY SETTING: Prevents browser detection issues
+  
+browserOptions:
+  browserType: chrome
+  headless: false
+```
+
+**Alternative Solutions:**
+1. **Specify existing Chrome profile:**
+   ```yaml
+   drmConfig:
+     useTemporaryProfile: false
+     chromeProfilePath: "/Users/username/Library/Application Support/Google/Chrome/Default"
+   ```
+
+2. **Ensure Chrome profile has DRM enabled:**
+   - Open Chrome manually
+   - Go to `chrome://settings/content/protectedContent`
+   - Enable "Allow sites to play protected content"
+
 ### DRM Content Not Playing (Headless Mode Issue)
 
 **Problem:** DRM-protected content fails to play, shows black screen, or license acquisition fails.
@@ -440,6 +477,52 @@ drmConfig:
   type: widevine
   licenseUrl: "https://your-widevine-license-server.com"
 ```
+
+### Profile Enhancement Failures
+
+**Problem:** Chrome profile copying and enhancement fails.
+
+**Symptoms:**
+- "Failed to enhance profile for DRM" errors
+- "ENOENT: no such file or directory, open '/tmp/chrome-profile-xxx/Default/Preferences'"
+- Missing Preferences files
+- Profile copying failures
+
+**Root Cause:** The Chrome profile copying process fails when the source profile's `Preferences` file is locked, corrupted, or missing.
+
+**Solutions:**
+1. **Check Profile Path:**
+   ```bash
+   # Verify your Chrome profile path exists
+   ls -la "/path/to/your/chrome/profile/Default"
+   
+   # Check if Preferences file exists
+   ls -la "/path/to/your/chrome/profile/Default/Preferences"
+   ```
+
+2. **Enable Protected Content in Chrome:**
+   - Close all Chrome instances
+   - Open Chrome → Settings → Privacy and security → Site Settings
+   - Click "Additional content settings" → "Protected content"
+   - Enable "Allow sites to play protected content"
+   - Restart Chrome completely
+
+3. **Use Diagnostic Script:**
+   ```bash
+   node scripts/diagnose-chrome-drm.js "/path/to/your/chrome/profile"
+   ```
+
+4. **Use Fallback Configuration:**
+   ```yaml
+   drmConfig:
+     useTemporaryProfile: true  # Let the system create optimized profiles
+   ```
+
+5. **Fix Applied in v1.0.0-rc.7:**
+   - Enhanced profile copying with better error handling
+   - Automatic creation of missing Preferences files
+   - Comprehensive DRM settings injection
+   - Graceful fallback when profile copying fails
 
 ### Certificate Issues
 

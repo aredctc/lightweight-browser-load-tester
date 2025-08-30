@@ -1,0 +1,1272 @@
+{
+  "summary": {
+    "totalRequests": 110,
+    "successfulRequests": 110,
+    "failedRequests": 0,
+    "averageResponseTime": 1255.2652000000003,
+    "peakConcurrentUsers": 1,
+    "testDuration": 20.952
+  },
+  "browserMetrics": [
+    {
+      "instanceId": "browser-1756576768594-shq3o41zr",
+      "memoryUsage": 70,
+      "cpuUsage": 15,
+      "requestCount": 0,
+      "errorCount": 0,
+      "uptime": 15.185
+    }
+  ],
+  "drmMetrics": [],
+  "networkMetrics": [
+    {
+      "url": "https://buydrm.com/multikey-demo/",
+      "method": "GET",
+      "responseTime": 913,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.492Z",
+      "requestSize": 468,
+      "responseSize": 35557,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/css/trp-floater-language-switcher.css?ver=2.9.3",
+      "method": "GET",
+      "responseTime": 112,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.623Z",
+      "requestSize": 452,
+      "responseSize": 2140,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/css/trp-language-switcher.css?ver=2.9.3",
+      "method": "GET",
+      "responseTime": 216,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.732Z",
+      "requestSize": 444,
+      "responseSize": 942,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/themes/hello-elementor/style.min.css?ver=3.4.3",
+      "method": "GET",
+      "responseTime": 215,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.733Z",
+      "requestSize": 408,
+      "responseSize": 1808,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/themes/hello-elementor/theme.min.css?ver=3.4.3",
+      "method": "GET",
+      "responseTime": 215,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.734Z",
+      "requestSize": 408,
+      "responseSize": 1311,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/themes/hello-elementor-child/ctc-style.css?ver=2.4.1.1632833952",
+      "method": "GET",
+      "responseTime": 213,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.734Z",
+      "requestSize": 425,
+      "responseSize": 272,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/themes/hello-elementor/header-footer.min.css?ver=3.4.3",
+      "method": "GET",
+      "responseTime": 212,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.735Z",
+      "requestSize": 416,
+      "responseSize": 1479,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-image.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 208,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.735Z",
+      "requestSize": 422,
+      "responseSize": 164,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/frontend.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 210,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.735Z",
+      "requestSize": 418,
+      "responseSize": 7101,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/css/modules/sticky.min.css?ver=3.27.2",
+      "method": "GET",
+      "responseTime": 193,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 428,
+      "responseSize": 116,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-text-editor.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 191,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 428,
+      "responseSize": 270,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/animations/styles/e-animation-grow.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 188,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 444,
+      "responseSize": 118,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-heading.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 190,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 424,
+      "responseSize": 188,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-social-icons.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 187,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 429,
+      "responseSize": 1170,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/conditionals/apple-webkit.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 186,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 435,
+      "responseSize": 557,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-icon-list.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 185,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.736Z",
+      "requestSize": 426,
+      "responseSize": 1068,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/animations/styles/fadeInUp.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 183,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.737Z",
+      "requestSize": 436,
+      "responseSize": 117,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/css/widget-posts.min.css?ver=3.27.2",
+      "method": "GET",
+      "responseTime": 184,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.737Z",
+      "requestSize": 426,
+      "responseSize": 2487,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css?family=Open+Sans%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&display=auto&ver=6.8.2",
+      "method": "GET",
+      "responseTime": 357,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.926Z",
+      "requestSize": 552,
+      "responseSize": 726,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-divider.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 383,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.938Z",
+      "requestSize": 424,
+      "responseSize": 771,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/eicons/css/elementor-icons.min.css?ver=5.35.0",
+      "method": "GET",
+      "responseTime": 381,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.938Z",
+      "requestSize": 436,
+      "responseSize": 4130,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/css/widget-social-icons.min.css?ver=3.24.0",
+      "method": "GET",
+      "responseTime": 380,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.938Z",
+      "requestSize": 429,
+      "responseSize": 1170,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/brands.css?ver=5.15.3",
+      "method": "GET",
+      "responseTime": 380,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.939Z",
+      "requestSize": 429,
+      "responseSize": 322,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/solid.css?ver=5.15.3",
+      "method": "GET",
+      "responseTime": 386,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.952Z",
+      "requestSize": 428,
+      "responseSize": 325,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/fontawesome.css?ver=5.15.3",
+      "method": "GET",
+      "responseTime": 387,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.952Z",
+      "requestSize": 434,
+      "responseSize": 13124,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/all.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 385,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.952Z",
+      "requestSize": 430,
+      "responseSize": 12869,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/essential-addons-for-elementor-lite/assets/front-end/css/view/general.min.css?ver=6.1.1",
+      "method": "GET",
+      "responseTime": 386,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.954Z",
+      "requestSize": 457,
+      "responseSize": 1539,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/fontawesome.min.css?ver=5.15.3",
+      "method": "GET",
+      "responseTime": 385,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.954Z",
+      "requestSize": 438,
+      "responseSize": 12617,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/v4-shims.min.css?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 387,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.954Z",
+      "requestSize": 435,
+      "responseSize": 4229,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/solid.min.css?ver=5.15.3",
+      "method": "GET",
+      "responseTime": 386,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.957Z",
+      "requestSize": 432,
+      "responseSize": 309,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/css/regular.min.css?ver=5.15.3",
+      "method": "GET",
+      "responseTime": 385,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.957Z",
+      "requestSize": 434,
+      "responseSize": 308,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://use.typekit.net/bjq1zzh.css",
+      "method": "GET",
+      "responseTime": 460,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:35.969Z",
+      "requestSize": 353,
+      "responseSize": 1208,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://cdn.callrail.com/companies/955364973/9d0c2ba28cc112af83bf/12/swap.js",
+      "method": "GET",
+      "responseTime": 433,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.007Z",
+      "requestSize": 379,
+      "responseSize": 719,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://p.typekit.net/p.css?s=1&k=bjq1zzh&ht=tk&f=24537.24538.24539.24540.24541.24542.24543.24544.24545.24546.24547.24548.24549.24550.24551.24552&a=140590281&app=typekit&e=css",
+      "method": "GET",
+      "responseTime": 38,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.008Z",
+      "requestSize": 498,
+      "responseSize": 5,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1",
+      "method": "GET",
+      "responseTime": 484,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.056Z",
+      "requestSize": 381,
+      "responseSize": 87553,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/ultimate-elementor/assets/min-css/uael-frontend.min.css?ver=1.37.5",
+      "method": "GET",
+      "responseTime": 506,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.063Z",
+      "requestSize": 436,
+      "responseSize": 226,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1",
+      "method": "GET",
+      "responseTime": 594,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.167Z",
+      "requestSize": 389,
+      "responseSize": 13577,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2023/04/BuyDRM-Primary-Logo.svg",
+      "method": "GET",
+      "responseTime": 683,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.257Z",
+      "requestSize": 447,
+      "responseSize": 2471,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/js/v4-shims.min.js?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 685,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.258Z",
+      "requestSize": 418,
+      "responseSize": 15073,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://s3.amazonaws.com/cdn.keyos.com/html5/keyos/2.3.0/styles/default-style.css",
+      "method": "GET",
+      "responseTime": 682,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.258Z",
+      "requestSize": 399,
+      "responseSize": 47172,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://use.typekit.net/af/b718ff/00000000000000007735f98d/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3",
+      "method": "GET",
+      "responseTime": 29,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.375Z",
+      "requestSize": 493,
+      "responseSize": 47460,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://use.typekit.net/af/5d97ff/00000000000000007735f999/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3",
+      "method": "GET",
+      "responseTime": 40,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.387Z",
+      "requestSize": 493,
+      "responseSize": 48412,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/opensans/v43/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2",
+      "method": "GET",
+      "responseTime": 71,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.417Z",
+      "requestSize": 435,
+      "responseSize": 43096,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2025/07/BuyDRM_Telenet_PressRelease_1200x628-1024x536.png",
+      "method": "GET",
+      "responseTime": 113,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.430Z",
+      "requestSize": 559,
+      "responseSize": 100986,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/09/BuyDRM-OVHcloud_Company-Logo-V2.svg",
+      "method": "GET",
+      "responseTime": 114,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.431Z",
+      "requestSize": 545,
+      "responseSize": 106166,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtm.js?id=GTM-PX5C442",
+      "method": "GET",
+      "responseTime": 122,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.460Z",
+      "requestSize": 357,
+      "responseSize": 112101,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://www.google-analytics.com/analytics.js",
+      "method": "GET",
+      "responseTime": 71,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.549Z",
+      "requestSize": 348,
+      "responseSize": 20737,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://www.google-analytics.com/j/collect?v=1&_v=j102&a=1252115865&t=pageview&_s=1&dl=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&ul=en-gb&dt=KeyOS%20Multikey%20DRM%20Demo%20%26%20Encrypted%20Media%20Content%20Test%20Page%20%7C%20BuyDRM&sr=1280x720&vp=1280x720&_u=YEBAAEABAAAAACAAI~&jid=684703242&gjid=1302572639&cid=1804101979.1756576777&tid=UA-9150644-1&_gid=1837319077.1756576777&_r=1&_slc=1&gtm=45He58r1n81PX5C442v854748090za200zd854748090&gcd=13l3l3l2l1l1&dma_cps=syphamo&dma=1&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948813~105427542~105427544&npa=1&z=761541161",
+      "method": "POST",
+      "responseTime": 22,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.580Z",
+      "requestSize": 948,
+      "responseSize": 15,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://s3.amazonaws.com/cdn.keyos.com/html5/keyos/2.3.0/styles/keyos-default.css",
+      "method": "GET",
+      "responseTime": 358,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.628Z",
+      "requestSize": 399,
+      "responseSize": 234741,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://s3.amazonaws.com/cdn.keyos.com/html5/keyos/2.3.0/styles/keyos-default.js",
+      "method": "GET",
+      "responseTime": 320,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.635Z",
+      "requestSize": 383,
+      "responseSize": 2223,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/gtag/js?id=G-NS0PQG1V2H&cx=c&_slc=1",
+      "method": "GET",
+      "responseTime": 70,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.650Z",
+      "requestSize": 371,
+      "responseSize": 151625,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://www.googletagmanager.com/static/service_worker/5840/sw_iframe.html?origin=https%3A%2F%2Fbuydrm.com",
+      "method": "GET",
+      "responseTime": 92,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.837Z",
+      "requestSize": 541,
+      "responseSize": 1486,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://region1.analytics.google.com/g/collect?v=2&tid=G-NS0PQG1V2H&gtm=45je58r1v9135701786za200&_p=1756576776305&_gaz=1&gcd=13l3l3l2l3l1&npa=1&dma_cps=syphamo&dma=1&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544&ul=en-gb&sr=1280x720&cid=1804101979.1756576777&ecid=839451889&uaa=arm&uab=64&uafvl=Not%253BA%253DBrand%3B99.0.0.0%7CGoogle%2520Chrome%3B139.0.7258.155%7CChromium%3B139.0.7258.155&uamb=0&uam=&uap=macOS&uapv=14.4.1&uaw=0&are=1&frm=0&pscdl=noapi&ec_mode=a&_eu=ABAI&_s=1&dl=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&dt=KeyOS%20Multikey%20DRM%20Demo%20%26%20Encrypted%20Media%20Content%20Test%20Page%20%7C%20BuyDRM&sid=1756576776&sct=1&seg=0&_tu=wAQ&en=page_view&_fv=1&_ss=1&_ee=1&tfd=2126",
+      "method": "POST",
+      "responseTime": 150,
+      "statusCode": 204,
+      "timestamp": "2025-08-30T17:59:36.853Z",
+      "requestSize": 1083,
+      "responseSize": 0,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://www.google.com/ccm/collect?tid=AW-661214503&en=page_view&dl=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&scrsrc=www.googletagmanager.com&frm=0&rnd=209826766.1756576777&dt=KeyOS%20Multikey%20DRM%20Demo%20%26%20Encrypted%20Media%20Content%20Test%20Page%20%7C%20BuyDRM&auid=1589447937.1756576777&navt=n&npa=1&gtm=45je58r1v9135701786za200xec&gcd=13l3l3l2l1l1&dma_cps=syphamo&dma=1&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544&tft=1756576776670&tfd=2096&apve=1&apvf=f",
+      "method": "POST",
+      "responseTime": 169,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.856Z",
+      "requestSize": 855,
+      "responseSize": 0,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://www.google.nl/ads/ga-audiences?v=1&t=sr&slf_rd=1&_r=4&tid=G-NS0PQG1V2H&cid=1804101979.1756576777&gtm=45je58r1v9135701786za200&aip=1&dma=1&dma_cps=syphamo&gcd=13l3l3l2l3l1&npa=1&frm=0&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544&z=1791490713",
+      "method": "GET",
+      "responseTime": 148,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:36.859Z",
+      "requestSize": 823,
+      "responseSize": 42,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://stats.g.doubleclick.net/g/collect?v=2&tid=G-NS0PQG1V2H&cid=1804101979.1756576777&gtm=45je58r1v9135701786za200&aip=1&dma=1&dma_cps=syphamo&gcd=13l3l3l2l3l1&npa=1&frm=0&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544",
+      "method": "POST",
+      "responseTime": 151,
+      "statusCode": 204,
+      "timestamp": "2025-08-30T17:59:36.859Z",
+      "requestSize": 605,
+      "responseSize": 0,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2025/07/BuyDRM_TV2Hungary_1200x628-1-1024x536.png",
+      "method": "GET",
+      "responseTime": 1402,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:37.720Z",
+      "requestSize": 551,
+      "responseSize": 91164,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/themes/hello-elementor/assets/js/hello-frontend.min.js?ver=3.4.3",
+      "method": "GET",
+      "responseTime": 2574,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:38.892Z",
+      "requestSize": 497,
+      "responseSize": 1936,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/ultimate-elementor/assets/min-js/uael-nav-menu.min.js?ver=1.37.5",
+      "method": "GET",
+      "responseTime": 2674,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:38.994Z",
+      "requestSize": 505,
+      "responseSize": 20924,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/ultimate-elementor/assets/lib/jquery-element-resize/jquery_resize.min.js?ver=1.37.5",
+      "method": "GET",
+      "responseTime": 2674,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:38.995Z",
+      "requestSize": 524,
+      "responseSize": 3381,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/ultimate-elementor/assets/lib/js-cookie/js_cookie.min.js?ver=1.37.5",
+      "method": "GET",
+      "responseTime": 2674,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:38.995Z",
+      "requestSize": 508,
+      "responseSize": 1956,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/lib/sticky/jquery.sticky.min.js?ver=3.27.2",
+      "method": "GET",
+      "responseTime": 2761,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.083Z",
+      "requestSize": 504,
+      "responseSize": 3721,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/imagesloaded.min.js?ver=5.0.0",
+      "method": "GET",
+      "responseTime": 2761,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.084Z",
+      "requestSize": 466,
+      "responseSize": 5520,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/essential-addons-for-elementor-lite/assets/front-end/js/view/general.min.js?ver=6.1.1",
+      "method": "GET",
+      "responseTime": 2771,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.094Z",
+      "requestSize": 526,
+      "responseSize": 11556,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/js/webpack.runtime.min.js?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 2769,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.096Z",
+      "requestSize": 494,
+      "responseSize": 5350,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/js/webpack-pro.runtime.min.js?ver=3.27.2",
+      "method": "GET",
+      "responseTime": 2861,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.187Z",
+      "requestSize": 502,
+      "responseSize": 6263,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/js/frontend-modules.min.js?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 3080,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.407Z",
+      "requestSize": 495,
+      "responseSize": 59749,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/dist/hooks.min.js?ver=4d63a3d491d11ffd8ac6",
+      "method": "GET",
+      "responseTime": 3186,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.516Z",
+      "requestSize": 479,
+      "responseSize": 4776,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/dist/i18n.min.js?ver=5e580eb46a90c2b997e6",
+      "method": "GET",
+      "responseTime": 3188,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.519Z",
+      "requestSize": 478,
+      "responseSize": 9141,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/js/frontend.min.js?ver=3.27.2",
+      "method": "GET",
+      "responseTime": 3282,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.613Z",
+      "requestSize": 491,
+      "responseSize": 24210,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/jquery/ui/core.min.js?ver=1.13.3",
+      "method": "GET",
+      "responseTime": 3386,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.718Z",
+      "requestSize": 469,
+      "responseSize": 21464,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/js/frontend.min.js?ver=3.27.3",
+      "method": "GET",
+      "responseTime": 3596,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:39.928Z",
+      "requestSize": 487,
+      "responseSize": 44252,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/js/elements-handlers.min.js?ver=3.27.2",
+      "method": "GET",
+      "responseTime": 3809,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.141Z",
+      "requestSize": 500,
+      "responseSize": 44708,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/09/key_blue.svg",
+      "method": "GET",
+      "responseTime": 3808,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.141Z",
+      "requestSize": 522,
+      "responseSize": 1327,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/10/Group-1120.png",
+      "method": "GET",
+      "responseTime": 3804,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.145Z",
+      "requestSize": 524,
+      "responseSize": 95578,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://s3.amazonaws.com/cdn.keyos.com/html5/keyos/2.3.0/keyos-player.js",
+      "method": "GET",
+      "responseTime": 4334,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.650Z",
+      "requestSize": 375,
+      "responseSize": 1534912,
+      "isStreamingRelated": true,
+      "streamingType": "api"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/09/buy-drm-bg2@2x.png",
+      "method": "GET",
+      "responseTime": 4387,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.732Z",
+      "requestSize": 528,
+      "responseSize": 205669,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/09/fingerprint_blue-1.svg",
+      "method": "GET",
+      "responseTime": 4399,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.732Z",
+      "requestSize": 532,
+      "responseSize": 4211,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/images/flags/en_US.png",
+      "method": "GET",
+      "responseTime": 4398,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.732Z",
+      "requestSize": 559,
+      "responseSize": 502,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/images/flags/fr_FR.png",
+      "method": "GET",
+      "responseTime": 4396,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.732Z",
+      "requestSize": 559,
+      "responseSize": 268,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/images/flags/es_MX.png",
+      "method": "GET",
+      "responseTime": 4397,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.732Z",
+      "requestSize": 559,
+      "responseSize": 402,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/images/flags/it_IT.png",
+      "method": "GET",
+      "responseTime": 4397,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.733Z",
+      "requestSize": 559,
+      "responseSize": 267,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2025/02/BuyDRM_Passes_1200x628-1024x536.png",
+      "method": "GET",
+      "responseTime": 4396,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.733Z",
+      "requestSize": 545,
+      "responseSize": 204469,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/images/flags/ru_RU.png",
+      "method": "GET",
+      "responseTime": 4396,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.733Z",
+      "requestSize": 559,
+      "responseSize": 241,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://snap.licdn.com/li.lms-analytics/insight.min.js",
+      "method": "GET",
+      "responseTime": 184,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.982Z",
+      "requestSize": 357,
+      "responseSize": 18349,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://js.callrail.com/group/0/9d0c2ba28cc112af83bf/12/swap_session.json",
+      "method": "POST",
+      "responseTime": 188,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:40.995Z",
+      "requestSize": 923,
+      "responseSize": 116,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://js.callrail.com/group/0/9d0c2ba28cc112af83bf/12/icap.js?t=1756576780994&GoogleAnalytics4__ga=GA1.2.1804101979.1756576777&ga=GA1.2.1804101979.1756576777&uuid=57a2c8c3-6c13-46b2-863a-2c581331788a&ids%5B%5D=955364973",
+      "method": "GET",
+      "responseTime": 122,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:41.117Z",
+      "requestSize": 524,
+      "responseSize": 22,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://px.ads.linkedin.com/attribution_trigger?pid=108241&time=1756576780980&url=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F",
+      "method": "GET",
+      "responseTime": 213,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:41.198Z",
+      "requestSize": 426,
+      "responseSize": 548,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://px.ads.linkedin.com/collect?v=2&fmt=js&pid=108241&time=1756576780980&url=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F",
+      "method": "GET",
+      "responseTime": 277,
+      "statusCode": 302,
+      "timestamp": "2025-08-30T17:59:41.263Z",
+      "requestSize": 488,
+      "responseSize": 0,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://px4.ads.linkedin.com/collect?v=2&fmt=js&pid=108241&time=1756576780980&url=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&e_ipv6=AQKtsyk9hMg92gAAAZj8IpOvVZOaHgD575Py1cFf9WDZdC4s66c8IO8wo_EFfKSXWuB-7YVFpXUmst-KENFaKULt7Wp9TQ",
+      "method": "GET",
+      "responseTime": -67.828,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:41.516Z",
+      "requestSize": 717,
+      "responseSize": 0,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://px.ads.linkedin.com/wa/?medium=fetch",
+      "method": "POST",
+      "responseTime": 198,
+      "statusCode": 204,
+      "timestamp": "2025-08-30T17:59:41.723Z",
+      "requestSize": 1038,
+      "responseSize": 324,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/09/HomeHeaderSlider-Background.jpg",
+      "method": "GET",
+      "responseTime": 1797,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:42.551Z",
+      "requestSize": 734,
+      "responseSize": 23556,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/translatepress-multilingual/assets/images/arrow-down-3101.svg",
+      "method": "GET",
+      "responseTime": 1793,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:42.551Z",
+      "requestSize": 835,
+      "responseSize": 988,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/lib/font-awesome/webfonts/fa-solid-900.woff2",
+      "method": "GET",
+      "responseTime": 2006,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:42.765Z",
+      "requestSize": 786,
+      "responseSize": 78196,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/matomo/matomo.js",
+      "method": "GET",
+      "responseTime": 2305,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:43.075Z",
+      "requestSize": 650,
+      "responseSize": 67498,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-includes/js/wp-emoji-release.min.js?ver=6.8.2",
+      "method": "GET",
+      "responseTime": 2273,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:43.079Z",
+      "requestSize": 663,
+      "responseSize": 19251,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor/assets/js/text-editor.c084ef86600b6f11690d.bundle.min.js",
+      "method": "GET",
+      "responseTime": 2241,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:43.081Z",
+      "requestSize": 757,
+      "responseSize": 1394,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/js/load-more.8b46f464e573feab5dd7.bundle.min.js",
+      "method": "GET",
+      "responseTime": 2240,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:43.081Z",
+      "requestSize": 759,
+      "responseSize": 5346,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/elementor-pro/assets/js/posts.aec59265318492b89cb5.bundle.min.js",
+      "method": "GET",
+      "responseTime": 2329,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:43.172Z",
+      "requestSize": 755,
+      "responseSize": 3317,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/uploads/2021/09/BuyDRM-Fav512x512-150x150.png",
+      "method": "GET",
+      "responseTime": 108,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:43.293Z",
+      "requestSize": 851,
+      "responseSize": 4752,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://buydrm.com/wp-content/plugins/matomo/app/matomo.php?action_name=KeyOS%20Multikey%20DRM%20Demo%20%26%20Encrypted%20Media%20Content%20Test%20Page%20%7C%20BuyDRM&idsite=1&rec=1&r=752386&h=19&m=59&s=43&url=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&_id=d7c0e4711710b65d&_idn=1&send_image=0&_refts=0&pv_id=0IWP5z&pf_net=319&pf_srv=584&pf_tfr=5&pf_dm1=5312&uadata=%7B%22formFactors%22%3A%5B%22Desktop%22%5D%2C%22fullVersionList%22%3A%5B%7B%22brand%22%3A%22Not%3BA%3DBrand%22%2C%22version%22%3A%2299.0.0.0%22%7D%2C%7B%22brand%22%3A%22Google%20Chrome%22%2C%22version%22%3A%22139.0.7258.155%22%7D%2C%7B%22brand%22%3A%22Chromium%22%2C%22version%22%3A%22139.0.7258.155%22%7D%5D%2C%22mobile%22%3Afalse%2C%22model%22%3A%22%22%2C%22platform%22%3A%22macOS%22%2C%22platformVersion%22%3A%2214.4.1%22%7D&pdf=1&qt=0&realp=0&wma=0&fla=0&java=0&ag=0&cookie=1&res=1280x720",
+      "method": "POST",
+      "responseTime": 359,
+      "statusCode": 204,
+      "timestamp": "2025-08-30T17:59:43.439Z",
+      "requestSize": 1638,
+      "responseSize": 125,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://s3.amazonaws.com/cdn.keyos.com/html5/keyos/2.3.0/mpeg-dash.module-2.3.0.js",
+      "method": "GET",
+      "responseTime": 3969,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:47.150Z",
+      "requestSize": 385,
+      "responseSize": 1264838,
+      "isStreamingRelated": false
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/stream.mpd",
+      "method": "GET",
+      "responseTime": 442,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:47.660Z",
+      "requestSize": 406,
+      "responseSize": 4653,
+      "isStreamingRelated": true,
+      "streamingType": "manifest"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/video/2/init.mp4",
+      "method": "GET",
+      "responseTime": 327,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:48.006Z",
+      "requestSize": 412,
+      "responseSize": 1836,
+      "isStreamingRelated": true,
+      "streamingType": "segment"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/audio/en/init.mp4",
+      "method": "GET",
+      "responseTime": 338,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:48.018Z",
+      "requestSize": 413,
+      "responseSize": 1776,
+      "isStreamingRelated": true,
+      "streamingType": "segment"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/video/2/seg-0.m4f",
+      "method": "GET",
+      "responseTime": 362,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:48.377Z",
+      "requestSize": 413,
+      "responseSize": 299653,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/audio/en/seg-0.m4f",
+      "method": "GET",
+      "responseTime": 565,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:48.584Z",
+      "requestSize": 414,
+      "responseSize": 52137,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/audio/en/seg-1.m4f",
+      "method": "GET",
+      "responseTime": 405,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:49.082Z",
+      "requestSize": 414,
+      "responseSize": 30171,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/video/4/init.mp4",
+      "method": "GET",
+      "responseTime": 393,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:49.116Z",
+      "requestSize": 412,
+      "responseSize": 1836,
+      "isStreamingRelated": true,
+      "streamingType": "segment"
+    },
+    {
+      "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/video/4/seg-0.m4f",
+      "method": "GET",
+      "responseTime": 379,
+      "statusCode": 200,
+      "timestamp": "2025-08-30T17:59:49.497Z",
+      "requestSize": 413,
+      "responseSize": 705248,
+      "isStreamingRelated": true,
+      "streamingType": "license"
+    }
+  ],
+  "errors": [
+    {
+      "timestamp": "2025-08-30T17:59:36.853Z",
+      "level": "error",
+      "message": "Request failed",
+      "context": {
+        "sessionId": "session-1756576774546-j1kg91b",
+        "requestCount": 84,
+        "url": "https://region1.analytics.google.com/g/collect?v=2&tid=G-NS0PQG1V2H&gtm=45je58r1v9135701786za200&_p=1756576776305&_gaz=1&gcd=13l3l3l2l3l1&npa=1&dma_cps=syphamo&dma=1&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544&ul=en-gb&sr=1280x720&cid=1804101979.1756576777&ecid=839451889&uaa=arm&uab=64&uafvl=Not%253BA%253DBrand%3B99.0.0.0%7CGoogle%2520Chrome%3B139.0.7258.155%7CChromium%3B139.0.7258.155&uamb=0&uam=&uap=macOS&uapv=14.4.1&uaw=0&are=1&frm=0&pscdl=noapi&ec_mode=a&_eu=ABAI&_s=1&dl=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&dt=KeyOS%20Multikey%20DRM%20Demo%20%26%20Encrypted%20Media%20Content%20Test%20Page%20%7C%20BuyDRM&sid=1756576776&sct=1&seg=0&_tu=wAQ&en=page_view&_fv=1&_ss=1&_ee=1&tfd=2126",
+        "method": "POST",
+        "failure": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "timestamp": "2025-08-30T17:59:36.857Z",
+      "level": "error",
+      "message": "Request failed",
+      "context": {
+        "sessionId": "session-1756576774546-j1kg91b",
+        "requestCount": 84,
+        "url": "https://www.google.com/ccm/collect?tid=AW-661214503&en=page_view&dl=https%3A%2F%2Fbuydrm.com%2Fmultikey-demo%2F&scrsrc=www.googletagmanager.com&frm=0&rnd=209826766.1756576777&dt=KeyOS%20Multikey%20DRM%20Demo%20%26%20Encrypted%20Media%20Content%20Test%20Page%20%7C%20BuyDRM&auid=1589447937.1756576777&navt=n&npa=1&gtm=45je58r1v9135701786za200xec&gcd=13l3l3l2l1l1&dma_cps=syphamo&dma=1&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948811~104948813~105427542~105427544&tft=1756576776670&tfd=2096&apve=1&apvf=f",
+        "method": "POST",
+        "failure": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "timestamp": "2025-08-30T17:59:41.723Z",
+      "level": "error",
+      "message": "Request failed",
+      "context": {
+        "sessionId": "session-1756576774546-j1kg91b",
+        "requestCount": 98,
+        "url": "https://px.ads.linkedin.com/wa/?medium=fetch",
+        "method": "POST",
+        "failure": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "timestamp": "2025-08-30T17:59:49.605Z",
+      "level": "error",
+      "message": "Request failed",
+      "context": {
+        "sessionId": "session-1756576774546-j1kg91b",
+        "requestCount": 109,
+        "url": "https://d2jl6e4h8300i8.cloudfront.net/drm/BuyDRM/AnimationAudio_4_AAC/500-953-1406-1859/dash/video/4/seg-0.m4f",
+        "method": "GET",
+        "failure": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "timestamp": "2025-08-30T17:59:49.670Z",
+      "level": "error",
+      "message": "Session startup failed",
+      "stack": "page.goto: Target page, context or browser has been closed\nCall log:\n\u001b[2m  - navigating to \"https://buydrm.com/multikey-demo/\", waiting until \"networkidle\"\u001b[22m\n\n    at TestRunner.startSession (/Users/aredchyts/Repo/StreamingLoadTest/src/controllers/test-runner.ts:592:34)\n    at async startNextSession (/Users/aredchyts/Repo/StreamingLoadTest/src/controllers/test-runner.ts:536:11)",
+      "context": {
+        "sessionId": "session-1756576774546-j1kg91b"
+      }
+    }
+  ]
+}

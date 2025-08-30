@@ -10,6 +10,9 @@ export interface DRMConfiguration {
   licenseUrl: string;
   certificateUrl?: string;
   customHeaders?: Record<string, string>;
+  useTemporaryProfile?: boolean; // Default true, set false to use regular Chrome profile
+  chromeProfilePath?: string; // Optional path to existing Chrome profile (will be copied for each instance)
+  shareProfileBetweenInstances?: boolean; // Default false, set true to share profile (not recommended for parallel sessions)
 }
 
 /**

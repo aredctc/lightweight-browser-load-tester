@@ -33,6 +33,8 @@ drmConfig:
   customHeaders:
     Authorization: Bearer token123
     X-Custom-Header: custom-value
+  useTemporaryProfile: true  # Default: true, set false for regular Chrome profile
+  # chromeProfilePath: "/path/to/chrome/profile"  # Optional: specify existing profile
 
 # Browser configuration for DRM testing
 browserOptions:
@@ -83,23 +85,42 @@ drmConfig:
 
 ### Common Issues
 
-1. **"DRM not supported" Error**
+1. **"Browser needs updating" Error from Streaming Services**
+   - **Cause**: Temporary Chrome profiles or DRM flags may cause browser detection issues
+   - **Solution 1**: Use regular Chrome profile instead of temporary profile:
+     ```yaml
+     drmConfig:
+       type: widevine
+       licenseUrl: https://example.com/license
+       useTemporaryProfile: false  # Use regular Chrome profile
+     ```
+   - **Solution 2**: Specify existing Chrome profile with proper setup:
+     ```yaml
+     drmConfig:
+       type: widevine
+       licenseUrl: https://example.com/license
+       useTemporaryProfile: false
+       chromeProfilePath: "/Users/username/Library/Application Support/Google/Chrome/Default"
+     ```
+   - **Solution 3**: Ensure Chrome profile has proper DRM setup (visit chrome://settings/content/protectedContent)
+
+2. **"DRM not supported" Error**
    - Verify Chrome (not Chromium) is installed
    - Check Widevine CDM is enabled in `chrome://components/`
    - Ensure protected content is allowed in Chrome settings
 
-2. **DRM Permission Setup**
+3. **DRM Permission Setup**
    - Framework uses Chrome DevTools Protocol for native DRM permission management
-   - Automatically creates temporary Chrome profiles with DRM enabled
+   - Can use temporary Chrome profiles (default) or regular Chrome profiles
    - Bypasses Playwright limitations by using Chrome's native capabilities
    - Real Chrome browser provides full DRM functionality
 
-3. **License Request Failures**
+4. **License Request Failures**
    - Verify license server URL is correct
    - Check authentication headers are properly configured
    - Ensure network connectivity to license server
 
-4. **Playback Failures**
+5. **Playback Failures**
    - Check video codec compatibility
    - Verify DRM level requirements (L1 vs L3)
    - Ensure proper user agent string
@@ -177,26 +198,48 @@ resourceLimits:
 
 When testing against real DRM-protected content, you may need:
 
-1. **Pre-configured Chrome Profile**
+1. **Pre-configured Chrome Profile (Recommended for Streaming Services)**
    ```bash
    # Create a Chrome profile with DRM enabled
    google-chrome --user-data-dir=/path/to/test-profile --enable-widevine-cdm
    # Manually enable protected content in chrome://settings/content/protectedContent
    ```
 
-2. **Manual Permission Grant**
+2. **Use Regular Chrome Profile for Better Compatibility**
+   ```yaml
+   drmConfig:
+     type: widevine
+     licenseUrl: https://your-license-server.com/license
+     useTemporaryProfile: false  # Prevents "browser needs updating" issues
+     chromeProfilePath: "/path/to/drm-enabled-profile"  # Optional - will be copied for each instance
+     shareProfileBetweenInstances: false  # Default - creates unique profiles for parallel sessions
+   
+   browserOptions:
+     browserType: chrome
+     headless: false
+   ```
+
+   **Parallel Session Behavior:**
+   - Each browser instance gets a unique copy of the base profile
+   - Prevents profile locking conflicts between parallel sessions
+   - Maintains session isolation while preserving DRM capabilities
+
+3. **Temporary Profile Configuration (Default)**
+   ```yaml
+   drmConfig:
+     type: widevine
+     licenseUrl: https://your-license-server.com/license
+     useTemporaryProfile: true  # Default behavior
+   
+   browserOptions:
+     browserType: chrome
+     headless: false
+   ```
+
+4. **Manual Permission Grant**
    - Some DRM content requires user interaction to grant permissions
    - Consider using Chrome's `--autoplay-policy=no-user-gesture-required` flag
    - Test with content that doesn't require user interaction
-
-3. **Chrome Profile in Testing**
-   ```yaml
-   browserOptions:
-     browserType: chrome
-     args:
-       - "--user-data-dir=/path/to/drm-enabled-profile"
-       - "--enable-widevine-cdm"
-   ```
 
 ### Testing Strategy
 

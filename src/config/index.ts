@@ -43,14 +43,19 @@ const drmConfigSchema = Joi.object({
   type: Joi.string().valid('widevine', 'playready', 'fairplay').required(),
   licenseUrl: Joi.string().uri().required(),
   certificateUrl: Joi.string().uri().optional(),
-  customHeaders: Joi.object().pattern(Joi.string(), Joi.string()).optional()
+  customHeaders: Joi.object().pattern(Joi.string(), Joi.string()).optional(),
+  useTemporaryProfile: Joi.boolean().optional().default(true),
+  chromeProfilePath: Joi.string().optional().description('Optional: Path to existing Chrome profile. If not provided, fresh DRM-optimized profiles are created automatically.'),
+  shareProfileBetweenInstances: Joi.boolean().optional().default(false).description('Warning: Sharing profiles between instances may cause conflicts in parallel testing.')
 });
 
 const parameterTemplateSchema = Joi.object({
   target: Joi.string().valid('header', 'query', 'body').required(),
   name: Joi.string().required(),
   valueTemplate: Joi.string().required(),
-  scope: Joi.string().valid('global', 'per-session').required()
+  scope: Joi.string().valid('global', 'per-session').required(),
+  urlPattern: Joi.string().optional(),
+  method: Joi.string().optional()
 });
 
 const localStorageEntrySchema = Joi.object({
@@ -66,7 +71,7 @@ const resourceLimitsSchema = Joi.object({
 
 const prometheusConfigSchema = Joi.object({
   enabled: Joi.boolean().required(),
-  remoteWriteUrl: Joi.string().uri().required(),
+  remoteWriteUrl: Joi.string().uri().when('enabled', { is: true, then: Joi.required(), otherwise: Joi.optional() }),
   username: Joi.string().optional(),
   password: Joi.string().optional(),
   headers: Joi.object().pattern(Joi.string(), Joi.string()).optional(),
@@ -79,7 +84,7 @@ const prometheusConfigSchema = Joi.object({
 
 const opentelemetryConfigSchema = Joi.object({
   enabled: Joi.boolean().required(),
-  endpoint: Joi.string().uri().required(),
+  endpoint: Joi.string().uri().when('enabled', { is: true, then: Joi.required(), otherwise: Joi.optional() }),
   protocol: Joi.string().valid('http/protobuf', 'http/json', 'grpc').default('http/protobuf'),
   headers: Joi.object().pattern(Joi.string(), Joi.string()).optional(),
   serviceName: Joi.string().default('lightweight-browser-load-tester'),
@@ -156,6 +161,9 @@ const ENV_MAPPINGS: Record<string, string> = {
   'LOAD_TEST_DRM_TYPE': 'drmConfig.type',
   'LOAD_TEST_DRM_LICENSE_URL': 'drmConfig.licenseUrl',
   'LOAD_TEST_DRM_CERT_URL': 'drmConfig.certificateUrl',
+  'LOAD_TEST_DRM_USE_TEMPORARY_PROFILE': 'drmConfig.useTemporaryProfile',
+  'LOAD_TEST_DRM_CHROME_PROFILE_PATH': 'drmConfig.chromeProfilePath',
+  'LOAD_TEST_DRM_SHARE_PROFILE': 'drmConfig.shareProfileBetweenInstances',
   'LOAD_TEST_PROMETHEUS_ENABLED': 'prometheus.enabled',
   'LOAD_TEST_PROMETHEUS_URL': 'prometheus.remoteWriteUrl',
   'LOAD_TEST_PROMETHEUS_USERNAME': 'prometheus.username',
@@ -327,6 +335,10 @@ export class ConfigurationManager {
       .option('--drm-type <type>', 'DRM type (widevine|playready|fairplay)')
       .option('--drm-license-url <url>', 'DRM license URL')
       .option('--drm-cert-url <url>', 'DRM certificate URL')
+      .option('--drm-use-temporary-profile', 'Use temporary Chrome profile for DRM (default: true)')
+      .option('--drm-no-temporary-profile', 'Use regular Chrome profile instead of temporary profile')
+      .option('--drm-chrome-profile-path <path>', 'Path to existing Chrome profile for DRM')
+      .option('--drm-share-profile', 'Share Chrome profile between instances (not recommended for parallel sessions)')
       .option('--prometheus-enabled', 'Enable Prometheus metrics export')
       .option('--prometheus-url <url>', 'Prometheus RemoteWrite endpoint URL')
       .option('--prometheus-username <username>', 'Prometheus authentication username')
@@ -365,11 +377,17 @@ export class ConfigurationManager {
       if (options.maxInstances !== undefined) config.resourceLimits.maxConcurrentInstances = options.maxInstances;
     }
 
-    if (options.drmType !== undefined || options.drmLicenseUrl !== undefined || options.drmCertUrl !== undefined) {
+    if (options.drmType !== undefined || options.drmLicenseUrl !== undefined || options.drmCertUrl !== undefined ||
+        options.drmUseTemporaryProfile !== undefined || options.drmNoTemporaryProfile !== undefined ||
+        options.drmChromeProfilePath !== undefined || options.drmShareProfile !== undefined) {
       config.drmConfig = {};
       if (options.drmType !== undefined) config.drmConfig.type = options.drmType;
       if (options.drmLicenseUrl !== undefined) config.drmConfig.licenseUrl = options.drmLicenseUrl;
       if (options.drmCertUrl !== undefined) config.drmConfig.certificateUrl = options.drmCertUrl;
+      if (options.drmUseTemporaryProfile !== undefined) config.drmConfig.useTemporaryProfile = true;
+      if (options.drmNoTemporaryProfile !== undefined) config.drmConfig.useTemporaryProfile = false;
+      if (options.drmChromeProfilePath !== undefined) config.drmConfig.chromeProfilePath = options.drmChromeProfilePath;
+      if (options.drmShareProfile !== undefined) config.drmConfig.shareProfileBetweenInstances = options.drmShareProfile;
     }
 
     if (options.prometheusEnabled !== undefined || options.prometheusUrl !== undefined || 
@@ -535,7 +553,10 @@ export class ConfigurationManager {
       drmConfig: {
         type: 'widevine',
         licenseUrl: 'https://example.com/license',
-        certificateUrl: 'https://example.com/cert'
+        certificateUrl: 'https://example.com/cert',
+        useTemporaryProfile: true,
+        chromeProfilePath: '/path/to/chrome/profile',
+        shareProfileBetweenInstances: false
       },
       requestParameters: [
         {

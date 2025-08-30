@@ -781,17 +781,18 @@ describe('BrowserPool', () => {
       
       await browserPool.initialize();
       
-      // Verify comprehensive DRM arguments are used in persistent context
+      // Verify streamlined DRM arguments are used in persistent context
       expect((chromium as any).launchPersistentContext).toHaveBeenCalledWith(
         expect.stringMatching(/\/tmp\/chrome-drm-profile-/),
         expect.objectContaining({
           args: expect.arrayContaining([
             '--enable-widevine-cdm',
+            '--autoplay-policy=no-user-gesture-required',
             '--enable-features=VaapiVideoDecoder',
             '--disable-component-update',
-            '--use-fake-ui-for-media-stream',
+            '--allow-running-insecure-content',
             '--disable-background-media-suspend',
-            '--enable-experimental-web-platform-features'
+            '--disable-backgrounding-occluded-windows'
           ])
         })
       );
